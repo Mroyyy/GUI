@@ -1,7 +1,9 @@
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QDir, QEventLoop, Qt
-from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolicy, QGridLayout, QSpacerItem, QScrollArea
+import plotly
+from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
+from PyQt5.QtCore import QDir, QEventLoop, Qt, QUrl
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolicy, QGridLayout, QSpacerItem, \
+    QScrollArea, QWidget, QVBoxLayout, QLabel
 
 ##########################
 # Ferran's script functions
@@ -9,7 +11,12 @@ from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolic
 
 import Bio.SeqIO as IO
 # from custom_parser import parser
-import make_dashboard
+from PySide2.QtWebEngineWidgets import QWebEngineView
+from matplotlib.backends.backend_template import FigureCanvas
+from plotly.subplots import make_subplots
+from pygments.lexers import go
+
+import SecondWindow
 from bin.blast import *
 from bin.PDB_retriever import *
 import bin.config as cfg
@@ -27,8 +34,34 @@ from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 from bin.custom_top import make_rb_list, make_composite, write_custom_topology
 import pandas as pd
 
+import os
+from bin.custom_top import  write_custom_topology
+from pathlib import Path
 
-from SecondWindow import Ui_SecondWindow
+# File management/OS
+from pathlib import Path, PurePosixPath
+
+
+#Plotting
+# import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import pandas as pd
+
+## DASH
+from dash import Dash, dcc, html, Input, Output, State
+import subprocess
+
+#Custom topology
+from bin.custom_top import make_rb_list
+
+import plotly.io as pio
+import plotly.express as px
+
+import base64
+
+
+#from SecondWindow import Ui_SecondWindow
 
 class Ui_MainWindow(object):
     def openWindow(self):
@@ -36,6 +69,8 @@ class Ui_MainWindow(object):
         self.ui = Ui_SecondWindow()
         self.ui.setupOutput(self.window)
         self.window.show()
+
+        view.show()
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -201,7 +236,6 @@ class Ui_MainWindow(object):
 
         return self.lineEdit_8.setText(source), filename, query_name, fasta
 
-
     def create_dir(self):
         global output_dir
         options = QFileDialog.Options()
@@ -209,7 +243,8 @@ class Ui_MainWindow(object):
         name, _ = QFileDialog.getSaveFileName(None, 'QFileDialog.getSaveFileName()', "")
         output_dir = name
 
-        return self.lineEdit.setText(output_dir)
+        return output_dir
+
 
     def run(self):
         # Set fasta path and outdir and wait until those variables are set
@@ -570,8 +605,109 @@ class Ui_MainWindow(object):
         os.rmdir("obsolete")
         os.remove("DCI_pymol_output.txt")
 
-        MainWindow.hide()
+        #MainWindow.hide()
         ui.openWindow()
+
+
+
+class Ui_SecondWindow(object):
+    def update_graph(self):
+        global fig1
+        i = 0
+        df_list = []
+        structure_list = []
+        for child in Path(os.path.join(output_dir, "SEC3", "REPORT", "COVERAGE")).iterdir():
+            if child.is_file() and "composite" not in str(child):
+                i += 1
+                df = pd.read_csv(child)
+                df_list.append(df)
+                structure_list.append(child)
+
+        fig1 = make_subplots(rows=i, cols=1, shared_xaxes=True, x_title="Residue position")
+
+        i = 1
+        for df in df_list:
+            fig1.append_trace(go.Scatter(
+                x=df[df.columns[0]],  # ResID
+                y=df[df.columns[1]],
+                fill='tozeroy',
+                name=str(structure_list[i - 1])
+            ), row=i, col=1)
+            i += 1
+
+        # fig1.update_layout(height=400, width=1000, title_text="Coverage")
+        fig1.update_layout(title_text="Coverage")
+        fig1.update_yaxes(showgrid=False, range=[0, 1], showticklabels=False)
+
+        png1 = pio.write_image(fig1, "/home/gallegolab/Desktop/GUI/TFM/fig1.png", scale=1, width=1200, height=700)
+
+        return png1
+
+
+    def setupOutput(self, SecondWindow):
+        global img_tag
+        global view
+        SecondWindow.setObjectName("SecondWindow")
+        SecondWindow.resize(800, 600)
+        self.OutputWindow = QtWidgets.QWidget(SecondWindow)
+        self.OutputWindow.setObjectName("SecondWindow")
+
+
+        #self.label = QtWidgets.QLabel(self.OutputWindow)
+        #self.label.setGeometry(QtCore.QRect(0, 70, 881, 461))
+        # self.label.setText("hola")
+
+
+        data_uri = base64.b64encode(open("/home/gallegolab/Desktop/GUI/TFM/fig1.png", 'rb').read()).decode('utf-8')
+        img_tag = '<img src="data:image/png;base64,{0}">'.format(data_uri)
+
+        view = QWebEngineView()
+        view.setHtml(img_tag)
+        view.resize(1000, 1000)
+
+
+        ################
+        # to check
+        ###############
+
+        # layout = QVBoxLayout()
+        # label = QLabel(self)
+        # pixmap = QPixmap(self.update_graph)
+        # label.setPixmap(pixmap)
+        # layout.addWidget(label)
+        # self.setLayout(layout)
+        # self.show()
+
+
+
+        #self.label.setPixmap(QtGui.QPixmap(Ui_SecondWindow.update_graph(self)))
+
+        #self.label.setPixmap(QtGui.QPixmap("output_dir/SEC3/fig1.png"))
+        #self.label.setPixmap(QtGui.QPixmap("/home/gallegolab/Desktop/GUI/TFM/fig1.png"))
+
+        #self.label.setObjectName("label")
+
+        # self.pushButton = QtWidgets.QPushButton(self.OutputWindow)
+        # self.pushButton.setGeometry(QtCore.QRect(700, 520, 89, 25))
+        # self.pushButton.setObjectName("pushButton")
+        #
+        # SecondWindow.setCentralWidget(self.OutputWindow)
+        # self.menubar = QtWidgets.QMenuBar(SecondWindow)
+        # self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+        # self.menubar.setObjectName("menubar")
+        # SecondWindow.setMenuBar(self.menubar)
+        # self.statusbar = QtWidgets.QStatusBar(SecondWindow)
+        # self.statusbar.setObjectName("statusbar")
+        # SecondWindow.setStatusBar(self.statusbar)
+        #
+        # self.retranslateUi(SecondWindow)
+        # QtCore.QMetaObject.connectSlotsByName(SecondWindow)
+
+
+    def retranslateUi(self, SecondWindow):
+         _translate = QtCore.QCoreApplication.translate
+         SecondWindow.setWindowTitle(_translate("SecondWindow", "SecondWindow"))
+    #     self.pushButton.setText(_translate("SecondWindow", "Next"))
 
 
 
@@ -588,6 +724,8 @@ if __name__ == "__main__":
     MainWindow.show()
     loop = QEventLoop()
     loop.exec()  # waits
+
+
 
     sys.exit(app.exec_())
 
