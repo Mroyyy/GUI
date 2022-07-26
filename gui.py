@@ -24,6 +24,8 @@ import logging as l
 from pathlib import Path, PurePosixPath
 import os
 import shutil
+
+from bin.dashboard.dashboard_functions import read_DFI_csvs, read_hng_files
 from bin.graphical_summary import StructuReport
 from bin.extract_flexible_residues import extract_residue_list
 from bin.process_predicted_model import *
@@ -61,6 +63,7 @@ import plotly.express as px
 import base64
 
 
+
 #from SecondWindow import Ui_SecondWindow
 
 class Ui_MainWindow(object):
@@ -70,7 +73,7 @@ class Ui_MainWindow(object):
         self.ui.setupOutput(self.window)
         self.window.show()
 
-        view.show()
+        #view.show()
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -605,13 +608,39 @@ class Ui_MainWindow(object):
         os.rmdir("obsolete")
         os.remove("DCI_pymol_output.txt")
 
-        #MainWindow.hide()
+        MainWindow.hide()
         ui.openWindow()
 
 
 
 class Ui_SecondWindow(object):
+    def show_plot(self):
+        '''
+        Connection function: show coverage plot
+        Calls update_graph() at the beginning in order to save the image and then show it
+        '''
+        self.update_graph()
+        self.plot_out = QtWidgets.QMainWindow()
+        self.pl = Ui_plot()
+        self.pl.setup(self.plot_out)
+        self.plot_out.show()
+
+    def show_Secondplot(self):
+        '''
+        Connection function: show hinges and flexibility plot
+        Calls update_Secondgraph() at the beginning in order to save the image and then show it
+        '''
+        self.update_Secondgraph()
+        self.plot_Secondout = QtWidgets.QMainWindow()
+        self.plSec = Ui_Secondplot()
+        self.plSec.setup(self.plot_Secondout)
+        self.plot_Secondout.show()
+
     def update_graph(self):
+        '''
+        Function that creates coverage plot, reads data from output directory and makes graph
+        :return: coverage plot
+        '''
         global fig1
         i = 0
         df_list = []
@@ -639,78 +668,224 @@ class Ui_SecondWindow(object):
         fig1.update_layout(title_text="Coverage")
         fig1.update_yaxes(showgrid=False, range=[0, 1], showticklabels=False)
 
-        png1 = pio.write_image(fig1, "/home/gallegolab/Desktop/GUI/TFM/fig1.png", scale=1, width=1200, height=700)
+        # function that saves image as .png
+        png1 = pio.write_image(fig1, "fig1.png", scale=1, width=1200, height=700)
 
-        return png1
+        return fig1
 
+    def update_Secondgraph(self):
+        '''
+        Function that reads data from output directory and predicts hinges and dynamic flexibility
+        :return: DFI profiles + Predicted hinges
+        '''
+        dfi_dict = read_DFI_csvs(os.path.join(output_dir, "SEC3", "REPORT", "DFI"))
+        hng_dict = read_hng_files(os.path.join(output_dir, "SEC3", "HINGES"))
+        dfi_files = [dfi_file for dfi_file in dfi_dict.keys() if
+                     "AF_DFI" not in str(dfi_file.stem) and "RF_DFI" not in str(dfi_file.stem)]
+
+        fig2 = make_subplots(
+            rows=len(dfi_files), cols=1, shared_xaxes=True,
+            x_title="Residue position"
+        )
+
+        i = 1
+        for dfi_file in dfi_files:
+            df = dfi_dict[dfi_file]
+            fig2.append_trace(go.Scatter(
+                x=df[df.columns[0]],  # resIDs
+                y=df[df.columns[1]],  # pctdfi
+                name=str(dfi_file)
+            ), row=i, col=1)
+            j = 1
+            for hng_file in hng_dict.keys():
+                if str(PurePosixPath(dfi_file).stem)[0:-13] == str(PurePosixPath(hng_file).stem):
+                    for hinge in hng_dict[hng_file]:
+                        fig2.add_vrect(
+                            x0=hinge.split(':')[0],
+                            x1=hinge.split(':')[1],
+                            annotation_text=f"H{j}", annotation_position="top left",
+                            fillcolor="#52BE80", opacity=0.2,
+                            layer="below", line_width=0,
+                            row=i, col=1)
+                        j += 1
+            i += 1
+        fig2.update_layout(title_text="DFI profiles + Predicted hinges",
+                           margin_pad=10, barmode="group", legend=dict(orientation="h", y=-0.35))
+        fig2.update_yaxes(showgrid=False, range=[0, 1], nticks=2)
+
+        png2 = pio.write_image(fig2, "fig2.png", scale=1, width=1200, height=700)
+
+        return fig2
 
     def setupOutput(self, SecondWindow):
-        global img_tag
-        global view
+        '''
+        set up second window, when introduced input fasta and output directory, window that will be opened to show
+        results
+        '''
         SecondWindow.setObjectName("SecondWindow")
-        SecondWindow.resize(800, 600)
+        SecondWindow.resize(1059, 686)
         self.OutputWindow = QtWidgets.QWidget(SecondWindow)
-        self.OutputWindow.setObjectName("SecondWindow")
+        self.OutputWindow.setObjectName("OutputWindow")
+        self.label = QtWidgets.QLabel(self.OutputWindow)
+        self.label.setGeometry(QtCore.QRect(40, 80, 971, 61))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.label.setFont(font)
+        self.label.setWordWrap(True)
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(self.OutputWindow)
+        self.label_2.setGeometry(QtCore.QRect(40, 40, 161, 31))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_2.setFont(font)
+        self.label_2.setWordWrap(True)
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.OutputWindow)
+        self.label_3.setGeometry(QtCore.QRect(40, 170, 341, 31))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_3.setFont(font)
+        self.label_3.setWordWrap(True)
+        self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(self.OutputWindow)
+        self.label_4.setGeometry(QtCore.QRect(40, 220, 971, 331))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.label_4.setFont(font)
+        self.label_4.setWordWrap(True)
+        self.label_4.setObjectName("label_4")
+        self.pushButton = QtWidgets.QPushButton(self.OutputWindow)
+        self.pushButton.setGeometry(QtCore.QRect(920, 150, 89, 25))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.pushButton.setFont(font)
+        self.pushButton.setObjectName("pushButton")
+        self.pushButton_2 = QtWidgets.QPushButton(self.OutputWindow)
+        self.pushButton_2.setGeometry(QtCore.QRect(930, 510, 89, 25))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setObjectName("pushButton_2")
+        SecondWindow.setCentralWidget(self.OutputWindow)
+        self.menubar = QtWidgets.QMenuBar(SecondWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1059, 22))
+        self.menubar.setObjectName("menubar")
+        self.menuPage_1 = QtWidgets.QMenu(self.menubar)
+        self.menuPage_1.setObjectName("menuPage_1")
+        self.menuPage2 = QtWidgets.QMenu(self.menubar)
+        self.menuPage2.setObjectName("menuPage2")
+        SecondWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(SecondWindow)
+        self.statusbar.setObjectName("statusbar")
+        SecondWindow.setStatusBar(self.statusbar)
+        self.actionCoverage = QtWidgets.QAction(SecondWindow)
+        self.actionCoverage.setObjectName("actionCoverage")
+        self.actionHinges_and_Flexibility = QtWidgets.QAction(SecondWindow)
+        self.actionHinges_and_Flexibility.setObjectName("actionHinges_and_Flexibility")
+        self.actionComposite_and_Topology_File = QtWidgets.QAction(SecondWindow)
+        self.actionComposite_and_Topology_File.setObjectName("actionComposite_and_Topology_File")
+        self.actionCustom_hinges = QtWidgets.QAction(SecondWindow)
+        self.actionCustom_hinges.setObjectName("actionCustom_hinges")
+        self.menuPage_1.addAction(self.actionCoverage)
+        self.menuPage_1.addAction(self.actionHinges_and_Flexibility)
+        self.menuPage2.addAction(self.actionComposite_and_Topology_File)
+        self.menuPage2.addAction(self.actionCustom_hinges)
+        self.menubar.addAction(self.menuPage_1.menuAction())
+        self.menubar.addAction(self.menuPage2.menuAction())
 
+        self.retranslateUi(SecondWindow)
+        QtCore.QMetaObject.connectSlotsByName(SecondWindow)
 
-        #self.label = QtWidgets.QLabel(self.OutputWindow)
-        #self.label.setGeometry(QtCore.QRect(0, 70, 881, 461))
-        # self.label.setText("hola")
-
-
-        data_uri = base64.b64encode(open("/home/gallegolab/Desktop/GUI/TFM/fig1.png", 'rb').read()).decode('utf-8')
-        img_tag = '<img src="data:image/png;base64,{0}">'.format(data_uri)
-
-        view = QWebEngineView()
-        view.setHtml(img_tag)
-        view.resize(1000, 1000)
-
-
-        ################
-        # to check
-        ###############
-
-        # layout = QVBoxLayout()
-        # label = QLabel(self)
-        # pixmap = QPixmap(self.update_graph)
-        # label.setPixmap(pixmap)
-        # layout.addWidget(label)
-        # self.setLayout(layout)
-        # self.show()
-
-
-
-        #self.label.setPixmap(QtGui.QPixmap(Ui_SecondWindow.update_graph(self)))
-
-        #self.label.setPixmap(QtGui.QPixmap("output_dir/SEC3/fig1.png"))
-        #self.label.setPixmap(QtGui.QPixmap("/home/gallegolab/Desktop/GUI/TFM/fig1.png"))
-
-        #self.label.setObjectName("label")
-
-        # self.pushButton = QtWidgets.QPushButton(self.OutputWindow)
-        # self.pushButton.setGeometry(QtCore.QRect(700, 520, 89, 25))
-        # self.pushButton.setObjectName("pushButton")
-        #
-        # SecondWindow.setCentralWidget(self.OutputWindow)
-        # self.menubar = QtWidgets.QMenuBar(SecondWindow)
-        # self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
-        # self.menubar.setObjectName("menubar")
-        # SecondWindow.setMenuBar(self.menubar)
-        # self.statusbar = QtWidgets.QStatusBar(SecondWindow)
-        # self.statusbar.setObjectName("statusbar")
-        # SecondWindow.setStatusBar(self.statusbar)
-        #
-        # self.retranslateUi(SecondWindow)
-        # QtCore.QMetaObject.connectSlotsByName(SecondWindow)
 
 
     def retranslateUi(self, SecondWindow):
-         _translate = QtCore.QCoreApplication.translate
-         SecondWindow.setWindowTitle(_translate("SecondWindow", "SecondWindow"))
-    #     self.pushButton.setText(_translate("SecondWindow", "Next"))
+        _translate = QtCore.QCoreApplication.translate
+        SecondWindow.setWindowTitle(_translate("SecondWindow", "SecondWindow"))
+        self.label.setText(_translate("SecondWindow","<html><head/><body><p align=\"justify\">In this graph,you can see whic parts of the reference FASTA sequence are covered by structure. This structures come from either the <a href=\"https://www.rcsb.org/\"><span style=\" text-decoration: underline; color:#0000ff;\">Protein Data Bank</span></a>, <a href=\"https://www.deepmind.com/blog/alphafold-a-solution-to-a-50-year-old-grand-challenge-in-biology\"><span style=\" text-decoration: underline; color:#0000ff;\">AlphaFold</span></a> models or <a href=\"https://www.ipd.uw.edu/2021/07/rosettafold-accurate-protein-structure-prediction-accessible-to-all/\"><span style=\" text-decoration: underline; color:#0000ff;\">RoseTTaFold</span></a> models.<br/></p></body></html>"))
+        self.label_2.setText(_translate("SecondWindow", "COVERAGE"))
+        self.label_3.setText(_translate("SecondWindow", "HINGES AND FLEXIBILITY"))
+        self.label_4.setText(_translate("SecondWindow","<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">Flexibility is an important feature of proteins, since they need to move to perform their function and interact with their substrates. In the following section, we provide you with two types of flexibility prediction: the Dynamic Flexibility Index and Hinge Prediction. The overlap of these two measures might be helpful for you, in case you wanted to modify the final topology file with some of these hinges.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-style:italic; color:#323232;\">Dynamic Flexibility Index</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>This is per-residue index indicating the contribution of each residue to the overall flexibility of the protein. It uses a method based in an Elastic Network Model (ENM), which is a more lightweight (but less precise, obviously) alternative to Molecular Dynamics. for more info, </span><a href=\"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673471/\"><span style=\" text-decoration: underline; color:#0000ff;\">here</span></a><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"> is the original paper.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-style:italic; color:#323232;\">Hinge Prediction</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>Hinges are the regions of the protein that allow it to move and change conformations. Using </span><a href=\"https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac007/6525212?login=true\"><span style=\" text-decoration: underline; color:#0000ff;\">this tool</span></a><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"> we provide you with some suggested hinge regions. Note that this information is only available for experimental structures. This is due to the use of ENM, it is not designed to work with predicted models that might contain important artifacts, and, in this case, that are split into the highly confidently predicted regions.</span></p><p><a name=\"modebar-338c4d\"/><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/></span></p></body></html>"))
+        self.pushButton.setText(_translate("SecondWindow", "Show plot"))
+        self.pushButton.clicked.connect(self.show_plot)
+
+        self.pushButton_2.setText(_translate("SecondWindow", "Show plot"))
+        self.pushButton_2.clicked.connect(self.show_Secondplot)
+
+        self.menuPage_1.setTitle(_translate("SecondWindow", "Page 1"))
+        self.menuPage2.setTitle(_translate("SecondWindow", "Page2"))
+        self.actionCoverage.setText(_translate("SecondWindow", "Coverage"))
+        self.actionHinges_and_Flexibility.setText(_translate("SecondWindow", "Hinges and Flexibility"))
+        self.actionComposite_and_Topology_File.setText(_translate("SecondWindow", "Composite and Topology File"))
+        self.actionCustom_hinges.setText(_translate("SecondWindow", "Custom hinges"))
 
 
+class Ui_plot(object):
+    '''
+    set up window to show image of plot
+    '''
+    def setup(self, plotWindow):
+        plotWindow.resize(1066, 733)
+        self.plotwindow = QtWidgets.QWidget(plotWindow)
+        self.plotwindow.setObjectName("plotwindow")
+        self.label = QtWidgets.QLabel(self.plotwindow)
+        self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
+        self.label.setText("")
+        self.label.setPixmap(QtGui.QPixmap("fig1.png"))
+        self.label.setObjectName("label")
+        plotWindow.setCentralWidget(self.plotwindow)
+        self.menubar = QtWidgets.QMenuBar(plotWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
+        self.menubar.setObjectName("menubar")
+        plotWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(plotWindow)
+        self.statusbar.setObjectName("statusbar")
+        plotWindow.setStatusBar(self.statusbar)
 
+        self.retranslateUi(plotWindow)
+        QtCore.QMetaObject.connectSlotsByName(plotWindow)
+
+    def retranslateUi(self, plotWindow):
+        _translate = QtCore.QCoreApplication.translate
+        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
+
+class Ui_Secondplot(object):
+    '''
+    set up another window to show predicted hinges and flexibility plot
+    '''
+    def setup(self, plotWindow):
+        plotWindow.resize(1066, 733)
+        self.plotwindow = QtWidgets.QWidget(plotWindow)
+        self.plotwindow.setObjectName("plotwindow")
+        self.label = QtWidgets.QLabel(self.plotwindow)
+        self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
+        self.label.setText("")
+        self.label.setPixmap(QtGui.QPixmap("fig2.png"))
+        self.label.setObjectName("label")
+        plotWindow.setCentralWidget(self.plotwindow)
+        self.menubar = QtWidgets.QMenuBar(plotWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
+        self.menubar.setObjectName("menubar")
+        plotWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(plotWindow)
+        self.statusbar.setObjectName("statusbar")
+        plotWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(plotWindow)
+        QtCore.QMetaObject.connectSlotsByName(plotWindow)
+
+    def retranslateUi(self, plotWindow):
+        _translate = QtCore.QCoreApplication.translate
+        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
 
 
 if __name__ == "__main__":
