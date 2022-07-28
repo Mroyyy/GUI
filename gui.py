@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
 from PyQt5.QtCore import QDir, QEventLoop, Qt, QUrl
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolicy, QGridLayout, QSpacerItem, \
-    QScrollArea, QWidget, QVBoxLayout, QLabel
+    QScrollArea, QWidget, QVBoxLayout, QLabel, QSizeGrip, QPlainTextEdit, QPushButton
 
 ##########################
 # Ferran's script functions
@@ -25,7 +25,7 @@ from pathlib import Path, PurePosixPath
 import os
 import shutil
 
-from bin.dashboard.dashboard_functions import read_DFI_csvs, read_hng_files
+from bin.dashboard.dashboard_functions import read_DFI_csvs, read_hng_files, read_compsite_files
 from bin.graphical_summary import StructuReport
 from bin.extract_flexible_residues import extract_residue_list
 from bin.process_predicted_model import *
@@ -60,14 +60,13 @@ from bin.custom_top import make_rb_list
 import plotly.io as pio
 import plotly.express as px
 
-import base64
 
-
-
-#from SecondWindow import Ui_SecondWindow
 
 class Ui_MainWindow(object):
     def openWindow(self):
+        '''
+        Creates connection between input window and output window (second window)
+        '''
         self.window = QtWidgets.QMainWindow()
         self.ui = Ui_SecondWindow()
         self.ui.setupOutput(self.window)
@@ -80,6 +79,14 @@ class Ui_MainWindow(object):
         MainWindow.resize(800, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+
+        self.formLayoutWidget = QtWidgets.QWidget(self.centralwidget)
+        self.formLayoutWidget.setGeometry(QtCore.QRect(0, 0, 2, 2))
+        self.formLayoutWidget.setObjectName("formLayoutWidget")
+        self.formLayout = QtWidgets.QFormLayout(self.formLayoutWidget)
+        self.formLayout.setContentsMargins(0, 0, 0, 0)
+        self.formLayout.setObjectName("formLayout")
+
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(40, 40, 461, 41))
         self.label.setObjectName("label")
@@ -92,6 +99,8 @@ class Ui_MainWindow(object):
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(40, 120, 161, 31))
         self.label_2.setObjectName("label_2")
+
+
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
         self.label_3.setGeometry(QtCore.QRect(40, 240, 181, 31))
         self.label_3.setObjectName("label_3")
@@ -151,7 +160,6 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
 
-
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -175,55 +183,11 @@ class Ui_MainWindow(object):
         self.pushButton_2.setText(_translate("MainWindow", "Select file"))
         self.pushButton_2.clicked.connect(self.get_file)
 
-    def pushButton_handler(self):
-        self.open_dialog_box()
-
-        # opens file containing the sequence and print it
-
-    def open_dialog_box(self):
-        filename = QFileDialog.getOpenFileName()
-        path = filename[0]
-        print(path)
-
-        with open(path, "r") as f:
-            for fasta in f:
-                if fasta[0] != '>':  # read fasta and skip name, i.e. >SEC3
-                    # print(line) # print sequence
-                    self.lineEdit_8.setText(path)  # print sequence in box, then change to wherever (Ferran's function)
-
-    def editor(self):
-        self.textEdit = QTextEdit()
-        MainWindow.setCentralWidget(self.textEdit)
-
-    def file_open(self):
-        # need to make name a tuple
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        name, _ = QFileDialog.getOpenFileName(None, 'QFileDialog.getOpenFileName()', "")
-        filename = name.split("/")[-1]
-        source = name
-        file = open(name, 'r')
-        #self.editor()
-
-        with file:
-            text = file.read()
-            #if text == '':
-            #    return self.lineEdit_8.setText("WARNING: Any file was selected")
-            #else:
-            #return self.lineEdit_8.setText(text), file, filename, source
-
-    def file_save(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        name, _ = QFileDialog.getSaveFileName(None, 'QFileDialog.getSaveFileName()', "")
-        file = open(name, 'w')
-        text = self.textEdit.toPlainText()
-        file.write(text)
-        file.close()
-
-    ##############################
 
     def get_file(self):
+        '''
+        Function that gets filename of fasta, its directory, and the sequence it self
+        '''
         global source
         global filename
         global query_name
@@ -235,23 +199,28 @@ class Ui_MainWindow(object):
         source = name
         file = open(name, 'r')
         query_name, fasta = list(file)
+        #query_name = print(list(file))
         query_name = query_name.replace(">", "").strip()
 
         return self.lineEdit_8.setText(source), filename, query_name, fasta
 
     def create_dir(self):
+        '''
+        Creates output directory
+        '''
         global output_dir
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         name, _ = QFileDialog.getSaveFileName(None, 'QFileDialog.getSaveFileName()', "")
         output_dir = name
 
-        return output_dir
+        return self.lineEdit.setText(output_dir)
 
 
     def run(self):
         # Set fasta path and outdir and wait until those variables are set
         verbose = True
+
 
         ### Initializing the LOG system ###
 
@@ -642,10 +611,11 @@ class Ui_SecondWindow(object):
         :return: coverage plot
         '''
         global fig1
+        global query_name
         i = 0
         df_list = []
         structure_list = []
-        for child in Path(os.path.join(output_dir, "SEC3", "REPORT", "COVERAGE")).iterdir():
+        for child in Path(os.path.join(output_dir, query_name, "REPORT", "COVERAGE")).iterdir():
             if child.is_file() and "composite" not in str(child):
                 i += 1
                 df = pd.read_csv(child)
@@ -669,7 +639,7 @@ class Ui_SecondWindow(object):
         fig1.update_yaxes(showgrid=False, range=[0, 1], showticklabels=False)
 
         # function that saves image as .png
-        png1 = pio.write_image(fig1, "fig1.png", scale=1, width=1200, height=700)
+        png1 = pio.write_image(fig1, f"{output_dir}/{query_name}/coverage_plot.png", scale=1, width=1400, height=700)
 
         return fig1
 
@@ -678,8 +648,8 @@ class Ui_SecondWindow(object):
         Function that reads data from output directory and predicts hinges and dynamic flexibility
         :return: DFI profiles + Predicted hinges
         '''
-        dfi_dict = read_DFI_csvs(os.path.join(output_dir, "SEC3", "REPORT", "DFI"))
-        hng_dict = read_hng_files(os.path.join(output_dir, "SEC3", "HINGES"))
+        dfi_dict = read_DFI_csvs(os.path.join(output_dir, query_name, "REPORT", "DFI"))
+        hng_dict = read_hng_files(os.path.join(output_dir, query_name, "HINGES"))
         dfi_files = [dfi_file for dfi_file in dfi_dict.keys() if
                      "AF_DFI" not in str(dfi_file.stem) and "RF_DFI" not in str(dfi_file.stem)]
 
@@ -713,9 +683,20 @@ class Ui_SecondWindow(object):
                            margin_pad=10, barmode="group", legend=dict(orientation="h", y=-0.35))
         fig2.update_yaxes(showgrid=False, range=[0, 1], nticks=2)
 
-        png2 = pio.write_image(fig2, "fig2.png", scale=1, width=1200, height=700)
+        png2 = pio.write_image(fig2, f"{output_dir}/{query_name}/hinges_prediction.png", scale=1, width=1400, height=700)
 
         return fig2
+
+
+    def openThirdWindow(self):
+        '''
+        Creates connection between input window and output window (second window)
+        '''
+        #SecondWindow.hide()
+        self.Thirdwindow = QtWidgets.QMainWindow()
+        self.ui = Ui_ThirdWindow()
+        self.ui.setupOutput(self.Thirdwindow)
+        self.Thirdwindow.show()
 
     def setupOutput(self, SecondWindow):
         '''
@@ -782,8 +763,6 @@ class Ui_SecondWindow(object):
         self.menubar.setObjectName("menubar")
         self.menuPage_1 = QtWidgets.QMenu(self.menubar)
         self.menuPage_1.setObjectName("menuPage_1")
-        self.menuPage2 = QtWidgets.QMenu(self.menubar)
-        self.menuPage2.setObjectName("menuPage2")
         SecondWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(SecondWindow)
         self.statusbar.setObjectName("statusbar")
@@ -798,20 +777,23 @@ class Ui_SecondWindow(object):
         self.actionCustom_hinges.setObjectName("actionCustom_hinges")
         self.menuPage_1.addAction(self.actionCoverage)
         self.menuPage_1.addAction(self.actionHinges_and_Flexibility)
-        self.menuPage2.addAction(self.actionComposite_and_Topology_File)
-        self.menuPage2.addAction(self.actionCustom_hinges)
+        self.menuPage_1.addAction(self.actionComposite_and_Topology_File)
+        self.menuPage_1.addAction(self.actionCustom_hinges)
         self.menubar.addAction(self.menuPage_1.menuAction())
-        self.menubar.addAction(self.menuPage2.menuAction())
+
+        self.pushButton_3 = QtWidgets.QPushButton(self.OutputWindow)
+        self.pushButton_3.setFont(font)
+        self.pushButton_3.setObjectName("pushButton_3")
+        self.pushButton_3.setGeometry(QtCore.QRect(810, 540, 89, 25))
 
         self.retranslateUi(SecondWindow)
         QtCore.QMetaObject.connectSlotsByName(SecondWindow)
 
 
-
     def retranslateUi(self, SecondWindow):
         _translate = QtCore.QCoreApplication.translate
         SecondWindow.setWindowTitle(_translate("SecondWindow", "SecondWindow"))
-        self.label.setText(_translate("SecondWindow","<html><head/><body><p align=\"justify\">In this graph,you can see whic parts of the reference FASTA sequence are covered by structure. This structures come from either the <a href=\"https://www.rcsb.org/\"><span style=\" text-decoration: underline; color:#0000ff;\">Protein Data Bank</span></a>, <a href=\"https://www.deepmind.com/blog/alphafold-a-solution-to-a-50-year-old-grand-challenge-in-biology\"><span style=\" text-decoration: underline; color:#0000ff;\">AlphaFold</span></a> models or <a href=\"https://www.ipd.uw.edu/2021/07/rosettafold-accurate-protein-structure-prediction-accessible-to-all/\"><span style=\" text-decoration: underline; color:#0000ff;\">RoseTTaFold</span></a> models.<br/></p></body></html>"))
+        self.label.setText(_translate("SecondWindow","<html><head/><body><p align=\"justify\">In this graph,you can see which parts of the reference FASTA sequence are covered by structure. This structures come from either the <a href=\"https://www.rcsb.org/\"><span style=\" text-decoration: underline; color:#0000ff;\">Protein Data Bank</span></a>, <a href=\"https://www.deepmind.com/blog/alphafold-a-solution-to-a-50-year-old-grand-challenge-in-biology\"><span style=\" text-decoration: underline; color:#0000ff;\">AlphaFold</span></a> models or <a href=\"https://www.ipd.uw.edu/2021/07/rosettafold-accurate-protein-structure-prediction-accessible-to-all/\"><span style=\" text-decoration: underline; color:#0000ff;\">RoseTTaFold</span></a> models.<br/></p></body></html>"))
         self.label_2.setText(_translate("SecondWindow", "COVERAGE"))
         self.label_3.setText(_translate("SecondWindow", "HINGES AND FLEXIBILITY"))
         self.label_4.setText(_translate("SecondWindow","<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">Flexibility is an important feature of proteins, since they need to move to perform their function and interact with their substrates. In the following section, we provide you with two types of flexibility prediction: the Dynamic Flexibility Index and Hinge Prediction. The overlap of these two measures might be helpful for you, in case you wanted to modify the final topology file with some of these hinges.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-style:italic; color:#323232;\">Dynamic Flexibility Index</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>This is per-residue index indicating the contribution of each residue to the overall flexibility of the protein. It uses a method based in an Elastic Network Model (ENM), which is a more lightweight (but less precise, obviously) alternative to Molecular Dynamics. for more info, </span><a href=\"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673471/\"><span style=\" text-decoration: underline; color:#0000ff;\">here</span></a><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"> is the original paper.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-style:italic; color:#323232;\">Hinge Prediction</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>Hinges are the regions of the protein that allow it to move and change conformations. Using </span><a href=\"https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac007/6525212?login=true\"><span style=\" text-decoration: underline; color:#0000ff;\">this tool</span></a><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"> we provide you with some suggested hinge regions. Note that this information is only available for experimental structures. This is due to the use of ENM, it is not designed to work with predicted models that might contain important artifacts, and, in this case, that are split into the highly confidently predicted regions.</span></p><p><a name=\"modebar-338c4d\"/><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/></span></p></body></html>"))
@@ -821,8 +803,11 @@ class Ui_SecondWindow(object):
         self.pushButton_2.setText(_translate("SecondWindow", "Show plot"))
         self.pushButton_2.clicked.connect(self.show_Secondplot)
 
+        self.pushButton_3.setText(_translate("SecondWindow", "Next"))
+        self.pushButton_3.clicked.connect(self.openThirdWindow)
+
+
         self.menuPage_1.setTitle(_translate("SecondWindow", "Page 1"))
-        self.menuPage2.setTitle(_translate("SecondWindow", "Page2"))
         self.actionCoverage.setText(_translate("SecondWindow", "Coverage"))
         self.actionHinges_and_Flexibility.setText(_translate("SecondWindow", "Hinges and Flexibility"))
         self.actionComposite_and_Topology_File.setText(_translate("SecondWindow", "Composite and Topology File"))
@@ -834,13 +819,13 @@ class Ui_plot(object):
     set up window to show image of plot
     '''
     def setup(self, plotWindow):
-        plotWindow.resize(1066, 733)
+        plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
         self.plotwindow.setObjectName("plotwindow")
         self.label = QtWidgets.QLabel(self.plotwindow)
         self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap("fig1.png"))
+        self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/coverage_plot.png"))
         self.label.setObjectName("label")
         plotWindow.setCentralWidget(self.plotwindow)
         self.menubar = QtWidgets.QMenuBar(plotWindow)
@@ -863,13 +848,13 @@ class Ui_Secondplot(object):
     set up another window to show predicted hinges and flexibility plot
     '''
     def setup(self, plotWindow):
-        plotWindow.resize(1066, 733)
+        plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
         self.plotwindow.setObjectName("plotwindow")
         self.label = QtWidgets.QLabel(self.plotwindow)
         self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap("fig2.png"))
+        self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/hinges_prediction.png"))
         self.label.setObjectName("label")
         plotWindow.setCentralWidget(self.plotwindow)
         self.menubar = QtWidgets.QMenuBar(plotWindow)
@@ -886,6 +871,300 @@ class Ui_Secondplot(object):
     def retranslateUi(self, plotWindow):
         _translate = QtCore.QCoreApplication.translate
         plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
+
+class Ui_Thirdplot(object):
+    '''
+    set up another window to show predicted hinges and flexibility plot
+    '''
+    def setup(self, plotWindow):
+        plotWindow.resize(1400, 733)
+        self.plotwindow = QtWidgets.QWidget(plotWindow)
+        self.plotwindow.setObjectName("plotwindow")
+        self.label = QtWidgets.QLabel(self.plotwindow)
+        self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
+        self.label.setText("")
+        self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/structure_plot.png"))
+        self.label.setObjectName("label")
+        plotWindow.setCentralWidget(self.plotwindow)
+        self.menubar = QtWidgets.QMenuBar(plotWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
+        self.menubar.setObjectName("menubar")
+        plotWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(plotWindow)
+        self.statusbar.setObjectName("statusbar")
+        plotWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(plotWindow)
+        QtCore.QMetaObject.connectSlotsByName(plotWindow)
+
+    def retranslateUi(self, plotWindow):
+        _translate = QtCore.QCoreApplication.translate
+        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
+
+class Ui_ThirdWindow(object):
+    def update_dropdown(self):
+        structure_list = []
+        for child in Path(os.path.join(output_dir, query_name, "REPORT", "COVERAGE")).iterdir():
+            if child.is_file() and "composite" not in str(child):
+                structure_list.append(str(child))
+
+        comp_dict = read_compsite_files(os.path.join(output_dir, query_name, "REPORT", "COVERAGE"))
+
+        split_path = os.path.join(output_dir, query_name).split("/")
+        out_name = split_path[-1]
+
+        filename = os.path.join(output_dir, query_name, "REPORT", "COVERAGE", f"{out_name}_composite_coverage.csv")
+        df = pd.read_csv(filename)
+        initial_structure_list = []
+        for str1 in df.columns[1:]:
+            id1 = str(os.path.basename(str1))
+            for str2 in structure_list:
+                id2 = str(os.path.basename(str2))
+                print(f"COMPARING: {id1} and {id2}")
+                if id1[0:-4] == id2[0:-13]:
+                    initial_structure_list.append(str2)
+                    print(f"ADDED {str2}")
+
+        return structure_list, initial_structure_list
+
+    def update_Thirdgraph(self):
+        options_chosen = [file for file in Path(os.path.join(output_dir, query_name, "REPORT", "COVERAGE")).iterdir()]
+
+        if len(options_chosen) == 0:
+            return None
+
+        if options_chosen is None:
+            fig = {}
+            return fig
+
+        i = 0
+        df_list = []
+        structure_list = []
+        for file in options_chosen:
+            if "composite" not in str(file):
+                i += 1
+                print(file)
+                df = pd.read_csv(file)
+                df_list.append(df)
+                structure_list.append(file)
+
+        fig4 = make_subplots(rows=i, cols=1, shared_xaxes=True, x_title="Residue position")
+
+        i = 1
+        for df in df_list:
+            fig4.append_trace(go.Scatter(
+                x=df[df.columns[0]],  # ResID
+                y=df[df.columns[1]],
+                fill='tozeroy',
+                name=str(structure_list[i - 1])
+            ), row=i, col=1)
+            i += 1
+
+        # fig4.update_layout(height=400, width=1000, title_text="Coverage")
+        fig4.update_layout(title_text="Coverage")
+        fig4.update_yaxes(showgrid=False, range=[0, 1], showticklabels=False)
+
+        png4 = pio.write_image(fig4, f"{output_dir}/{query_name}/structure_plot.png", scale=1, width=1400, height=700)
+
+        return fig4
+
+    def show_Compositeplot(self):
+        '''
+        Connection function: show coverage plot
+        Calls update_graph() at the beginning in order to save the image and then show it
+        '''
+        self.update_dropdown()
+        self.update_Thirdgraph()
+        self.plot_out = QtWidgets.QMainWindow()
+        self.pl = Ui_Thirdplot()
+        self.pl.setup(self.plot_out)
+        self.plot_out.show()
+
+    def onclick_topology(selected_fragments, n_clicks, output_dir, str_hinges_input):
+        structure_list = []
+        clicks = n_clicks
+        try:
+            for child in Path(os.path.join(output_dir, "PDB", "total")).iterdir():
+                if child.is_file() and "composite" not in str(child):
+                    for name in selected_fragments:
+                        if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
+                            structure_list.append(child)
+        except:
+            pass
+
+        try:
+            for child in Path(os.path.join(output_dir, "PDB", "partial")).iterdir():
+                if child.is_file() and "composite" not in str(child):
+                    for name in selected_fragments:
+                        if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
+                            structure_list.append(child)
+        except:
+            pass
+
+        try:
+            for child in Path(os.path.join(output_dir, "PDB", "CHAINS")).iterdir():
+                if child.is_file() and "composite" not in str(child):
+                    for name in selected_fragments:
+                        if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
+                            structure_list.append(child)
+        except:
+            pass
+
+        try:
+            for child in Path(os.path.join(output_dir, "ALPHAFOLD", "DOMAINS")).iterdir():
+                if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
+                    for name in selected_fragments:
+                        if str(os.path.basename(child)[0:-4]) == str(os.path.basename(name)[0:-13]):
+                            structure_list.append(child)
+        except:
+            pass
+
+        try:
+            for child in Path(os.path.join(output_dir, "ROSETTAFOLD", "DOMAINS")).iterdir():
+                if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
+                    for name in selected_fragments:
+                        if str(os.path.basename(child)[0:-4]) == str(os.path.basename(name)[0:-13]):
+                            structure_list.append(child)
+        except:
+            pass
+
+        fasta = "input_fasta/" + str(os.path.basename(output_dir)) + ".fasta"
+
+        rigid_bodies = make_rb_list(structure_list, fasta)
+
+        ## incorporate the hinges
+        hinges_list = [hinge for hinge in str_hinges_input.split(",")]
+        hinges_list = [tuple(i.split(':')) for i in hinges_list]
+        hinges_list = [(int(i[0]), int(i[1])) for i in hinges_list]
+
+        final_rigid_bodies = []
+
+        for rb in rigid_bodies:
+            print(f"RB: {rb.pdb_fn}")
+            split_rb = rb.split_rb_hinges(hinges_list)
+            print(f"RB SPLIT: {[rb.residue_range for rb in split_rb]}")
+            final_rigid_bodies = final_rigid_bodies + split_rb
+
+        print(f"INITIAL = {len(rigid_bodies)}, FINAL = {len(final_rigid_bodies)}")
+
+        final_rigid_bodies.sort(key=lambda x: x.residue_range[0])
+        str_out = str(output_dir)
+        out_name = str_out.split("/")[-1]
+        # Write the topology file
+        write_custom_topology(os.path.join(output_dir, "IMP", f"{out_name}_custom.topology"), final_rigid_bodies)
+
+        return f"Topology file created with:{[str(rb.pdb_fn) for rb in final_rigid_bodies]}"
+
+    def setupOutput(self, ThirdWindow):
+        '''
+        set up second window, when introduced input fasta and output directory, window that will be opened to show
+        results
+        '''
+        ThirdWindow.setObjectName("ThirdWindow")
+        ThirdWindow.resize(1066, 686)
+        ThirdWindow.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.SecondOutputWindow = QtWidgets.QWidget(ThirdWindow)
+        self.SecondOutputWindow.setObjectName("SecondOutputWindow")
+        self.label = QtWidgets.QLabel(self.SecondOutputWindow)
+        self.label.setGeometry(QtCore.QRect(40, 120, 971, 131))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.label.setFont(font)
+        self.label.setWordWrap(True)
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(self.SecondOutputWindow)
+        self.label_2.setGeometry(QtCore.QRect(40, 80, 431, 31))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_2.setFont(font)
+        self.label_2.setWordWrap(True)
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.SecondOutputWindow)
+        self.label_3.setGeometry(QtCore.QRect(40, 290, 341, 31))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_3.setFont(font)
+        self.label_3.setWordWrap(True)
+        self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(self.SecondOutputWindow)
+        self.label_4.setGeometry(QtCore.QRect(40, 330, 971, 191))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.label_4.setFont(font)
+        self.label_4.setWordWrap(True)
+        self.label_4.setObjectName("label_4")
+        self.pushButton = QtWidgets.QPushButton(self.SecondOutputWindow)
+        self.pushButton.setGeometry(QtCore.QRect(930, 270, 89, 25))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.pushButton.setFont(font)
+        self.pushButton.setObjectName("pushButton")
+        self.pushButton_2 = QtWidgets.QPushButton(self.SecondOutputWindow)
+        self.pushButton_2.setGeometry(QtCore.QRect(810, 540, 211, 25))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.textEdit = QtWidgets.QTextEdit(self.SecondOutputWindow)
+        self.textEdit.setGeometry(QtCore.QRect(250, 500, 201, 31))
+        self.textEdit.setObjectName("textEdit")
+        ThirdWindow.setCentralWidget(self.SecondOutputWindow)
+        self.menubar = QtWidgets.QMenuBar(ThirdWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1059, 22))
+        self.menubar.setObjectName("menubar")
+        self.menuPage_1 = QtWidgets.QMenu(self.menubar)
+        self.menuPage_1.setObjectName("menuPage_1")
+
+        ThirdWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(ThirdWindow)
+        self.statusbar.setObjectName("statusbar")
+        ThirdWindow.setStatusBar(self.statusbar)
+        self.actionCoverage = QtWidgets.QAction(ThirdWindow)
+        self.actionCoverage.setObjectName("actionCoverage")
+        self.actionHinges_and_Flexibility = QtWidgets.QAction(ThirdWindow)
+        self.actionHinges_and_Flexibility.setObjectName("actionHinges_and_Flexibility")
+        self.actionComposite_and_Topology_File = QtWidgets.QAction(ThirdWindow)
+        self.actionComposite_and_Topology_File.setObjectName("actionComposite_and_Topology_File")
+        self.actionCustom_hinges = QtWidgets.QAction(ThirdWindow)
+        self.actionCustom_hinges.setObjectName("actionCustom_hinges")
+        self.menuPage_1.addAction(self.actionCoverage)
+        self.menuPage_1.addAction(self.actionHinges_and_Flexibility)
+        self.menuPage_1.addAction(self.actionComposite_and_Topology_File)
+        self.menuPage_1.addAction(self.actionCustom_hinges)
+        self.menubar.addAction(self.menuPage_1.menuAction())
+
+        self.retranslateUi(ThirdWindow)
+        QtCore.QMetaObject.connectSlotsByName(ThirdWindow)
+
+    def retranslateUi(self, ThirdWindow):
+        _translate = QtCore.QCoreApplication.translate
+        ThirdWindow.setWindowTitle(_translate("ThirdWindow", "ThirdWindow"))
+        self.label.setText(_translate("ThirdWindow",
+                                      "<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">From all the structures retrieved by the program and provided by the user, the program generates this composite, trying to cover as much of the reference sequence as possible, avoiding overlaps.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">This comopsite can be used to automatically build an </span><a href=\"https://integrativemodeling.org/2.5.0/doc/ref/classIMP_1_1pmi_1_1topology_1_1TopologyReader.html\"><span style=\" text-decoration: underline; color:#0000ff;\">IMP topology file</span></a></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">If you want to generate another topology file, with your custom choice of fragments, simply select the fragments woy want to include and click the button &quot;Create Topology File&quot;. it will save yhe output inj the folder IMP of your selected output folder.</span></p></body></html>"))
+        self.label_2.setText(_translate("ThirdWindow", "COMPOSITE AND TOPOLOGY FILE"))
+        self.label_3.setText(_translate("ThirdWindow", "CUSTOM HINGES"))
+        self.label_4.setText(_translate("ThirdWindow",
+                                        "<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">In this section you can introduce hinge regions. Hinge regions are those regions of the protein that bend, allowing the movement of the more rigid domains, which is essential for the interaciton of the proteins with other biomolecules.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-weight:600; color:#323232;\">How are hinges encoded?</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>Let\'s imagine you have a proterin of 200 amino acids. The DFI and PACKMAN hinge prediction are indicating a putative hinge region between positions 50 and 100 and another one between 120 and 130.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">In the box, you will need to introduce the hinges with the following format: 50:100,120:130</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">The program will split the structures, in the topology file, according to the hinges introduced.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">Topology file created with:</span></p></body></html>"))
+        self.pushButton.setText(_translate("ThirdWindow", "Show plot"))
+        self.pushButton.clicked.connect(self.show_Compositeplot)
+
+        self.pushButton_2.setText(_translate("ThirdWindow", "Generate IMP Topology File"))
+        self.menuPage_1.setTitle(_translate("ThirdWindow", "Page 1"))
+        self.actionCoverage.setText(_translate("ThirdWindow", "Coverage"))
+        self.actionHinges_and_Flexibility.setText(_translate("ThirdWindow", "Hinges and Flexibility"))
+        self.actionComposite_and_Topology_File.setText(_translate("ThirdWindow", "Composite and Topology File"))
+        self.actionCustom_hinges.setText(_translate("ThirdWindow", "Custom hinges"))
+
 
 
 if __name__ == "__main__":
