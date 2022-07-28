@@ -216,6 +216,7 @@ class Ui_MainWindow(object):
 
         return self.lineEdit.setText(output_dir)
 
+    
 
     def run(self):
         # Set fasta path and outdir and wait until those variables are set
@@ -341,189 +342,6 @@ class Ui_MainWindow(object):
                             shutil.move(chain_path, newpath)
                             structures_for_query.append(newpath)
 
-        '''
-        # Don't forget the user's templates!
-        l.info("Checking user's templates")
-        if parser.custom_templates:
-            structures_for_query.append(parser.custom_templates)
-
-
-        ### ALPHAFOLD & PAE
-
-        # If you want to use your AF model and PAE file:
-        if parser.alphamodel:
-            l.info(f"custom AF model detected: {parser.alphamodel}")
-            af_dir = os.path.join(output_dir, query_name, "ALPHAFOLD", "")
-            Path(af_dir).mkdir(parents=True, exist_ok=True)
-            AF_server_model = parser.alphamodel
-            shutil.copy(AF_server_model, os.path.join(af_dir,
-                                                      PurePosixPath(AF_server_model).name))
-        if parser.PAE_json:
-            l.info(f"custom PAE matrix detected: {parser.PAE_json}")
-            PAE_dir = os.path.join(af_dir, "PAE", "")
-            Path(PAE_dir).mkdir(parents=True, exist_ok=True)
-            PAE_json = parser.PAE_json
-
-        from bin.utilities import submit_AF_to_SLURM, submit_RF_to_SLURM
-
-        if parser.run_alphafold:
-            l.info(f"Submitting AF2 SLURM batch script")
-            af_dir = os.path.join(output_dir, query_name, "ALPHAFOLD", "")
-            Path(af_dir).mkdir(parents=True, exist_ok=True)
-            submit_AF_to_SLURM(fasta, af_dir, workload_manager="sbatch",
-                               dummy_dir=".", max_jobs_in_queue=None)
-
-        ### ROSETTAFOLD
-
-        # If you want to use your RF model:
-        if parser.rosettamodel:
-            l.info(f"custom RF model detected: {parser.rosettamodel}")
-            rf_dir = os.path.join(output_dir, query_name, "ROSETTAFOLD", "")
-            custom_rf_dir = os.path.join(rf_dir, "CUSTOM")
-            Path(rf_dir).mkdir(parents=True, exist_ok=True)
-            Path(custom_rf_dir).mkdir(parents=True, exist_ok=True)
-            RF_custom_model = parser.rosettamodel
-            shutil.copy(RF_custom_model, os.path.join(custom_rf_dir, PurePosixPath(RF_custom_model).name))
-        if parser.run_rosettafold:
-            l.info(f"Submitting RF SLURM batch script")
-            rf_dir = os.path.join(output_dir, query_name, "ROSETTAFOLD", "")
-            Path(rf_dir).mkdir(parents=True, exist_ok=True)
-            submit_RF_to_SLURM(fasta, rf_dir, workload_manager="sbatch", dummy_dir=".", max_jobs_in_queue=None)
-
-        ### Extract confident regions
-
-        if (parser.alphamodel and parser.PAE_json) or (parser.run_alphafold):
-            # Setting up the parameters for the PHENIX library
-            master_phil = iotbx.phil.parse(master_phil_str)
-            params = master_phil.extract()
-            master_phil.format(python_object=params).show(out=sys.stdout)
-            p = params.process_predicted_model
-            p.domain_size = cfg.CCTBXconfig["AF2_domain_size"]
-            p.maximum_rmsd = cfg.CCTBXconfig["AF2_maximum_rmsd"]
-            p.b_value_field_is = 'lddt'
-
-            from iotbx.data_manager import DataManager
-
-            dm = DataManager()
-            dm.set_overwrite(True)
-
-            l.info("Extracting AF2 high confidence domains")
-            domains_dir = os.path.join(af_dir, "DOMAINS", "")
-            Path(domains_dir).mkdir(parents=True, exist_ok=True)
-            l.info(f"Domains will be stored in:{domains_dir}")
-
-            af_conficent_regions = []
-            for filename in os.listdir(af_dir):
-                if os.path.isfile(os.path.join(af_dir, filename)):
-                    l.info(f"Processing file: {filename}")
-                    print("\nProcessing and splitting model into domains")
-
-                    m = dm.get_model(os.path.join(af_dir, filename))
-                    pae_matrix = pae_matrix = parse_json_PAE(PAE_json)
-                    model_info = process_predicted_model(m, params, pae_matrix)
-
-                    chainid_list = model_info.chainid_list
-                    print("Segments found: %s" % (" ".join(chainid_list)))
-
-                    mmm = model_info.model.as_map_model_manager()
-
-                    # Write all the domains in one file
-                    mmm.write_model(os.path.join(domains_dir,
-                                                 f"{PurePosixPath(filename).stem}_domains.pdb"))
-
-                    # Write different domains in different files
-                    for chainid in chainid_list:
-                        selection_string = "chain %s" % (chainid)
-                        ph = model_info.model.get_hierarchy()
-                        asc1 = ph.atom_selection_cache()
-                        sel = asc1.selection(selection_string)
-                        m1 = model_info.model.select(sel)
-                        filepath = os.path.join(domains_dir,
-                                                f"{PurePosixPath(filename).stem}_{chainid}_AF.pdb")
-                        dm.write_model_file(m1, filepath)
-                        structures_for_query.append(filepath)
-
-                    conf_domains = extract_residue_list(os.path.join(domains_dir,
-                                                                     f"{PurePosixPath(filename).stem}_domains.pdb"),
-                                                        domains_dir)
-                    l.info(f"Residue list of confident domains: {conf_domains}")
-
-        # For Rosettafold models
-        if os.path.exists(os.path.join(output_dir, query_name, "ROSETTAFOLD", "")):
-            rf_dir = os.path.join(output_dir, query_name, "ROSETTAFOLD", "")
-            rf_models_dir = os.path.join(rf_dir, "model", "")
-            # Setting up the parameters for the PHENIX library
-            master_phil = iotbx.phil.parse(master_phil_str)
-            params = master_phil.extract()
-            master_phil.format(python_object=params).show(out=sys.stdout)
-            p = params.process_predicted_model
-            p.domain_size = cfg.CCTBXconfig["RF_domain_size"]
-            p.maximum_rmsd = cfg.CCTBXconfig["RF_maximum_rmsd"]
-            p.b_value_field_is = 'rmsd'
-
-            from iotbx.data_manager import DataManager
-
-            dm = DataManager()
-            dm.set_overwrite(True)
-
-            l.info("Extracting RoseTTaFold high confidence domains")
-            domains_dir = os.path.join(rf_dir, "DOMAINS", "")
-            Path(domains_dir).mkdir(parents=True, exist_ok=True)
-            l.info(f"Domains will be stored in:{domains_dir}")
-            abs_rf_dir = os.path.abspath(rf_models_dir)
-            abs_custom_rf_dir = os.path.abspath(rf_models_dir)
-            rf_conficent_regions = []
-            for filename in os.listdir(abs_rf_dir):
-                if os.path.isfile(os.path.join(abs_rf_dir, filename)) and \
-                        (fnmatch.fnmatch(filename, "model_*.crderr.pdb") or \
-                         fnmatch.fnmatch(filename, "model_*-crderr.pdb")):
-                    newname = filename.split(".")
-                    l.info(f"LIST NEWNAME: {newname}")
-                    noext = newname[0:-1]
-                    noext = "-".join(noext)
-                    ext = newname[-1]
-                    newname = noext + "." + ext
-                    l.info(f"NEWNAME: {newname}")
-                    filename = os.path.join(abs_rf_dir, filename)
-                    newname = os.path.join(abs_rf_dir, newname)
-                    os.rename(filename, newname)
-
-                    l.info(f"Processing file: {newname}")
-                    print("\nProcessing and splitting model into domains")
-
-                    m = dm.get_model(newname)
-                    model_info = process_predicted_model(m, params)
-
-                    chainid_list = model_info.chainid_list
-                    print("Segments found: %s" % (" ".join(chainid_list)))
-
-                    mmm = model_info.model.as_map_model_manager()
-
-                    # Write all the domains in one file
-                    mmm.write_model(os.path.join(domains_dir,
-                                                 f"{PurePosixPath(newname).stem}_domains.pdb"))
-
-                    # Write different domains in different files
-                    for chainid in chainid_list:
-                        selection_string = "chain %s" % (chainid)
-                        ph = model_info.model.get_hierarchy()
-                        asc1 = ph.atom_selection_cache()
-                        sel = asc1.selection(selection_string)
-                        m1 = model_info.model.select(sel)
-                        filepath = os.path.join(domains_dir,
-                                                f"{PurePosixPath(newname).stem}_{chainid}_RF.pdb")
-                        dm.write_model_file(m1, filepath)
-                        structures_for_query.append(filepath)
-
-                    conf_domains = extract_residue_list(os.path.join(domains_dir,
-                                                                     f"{PurePosixPath(newname).stem}_domains.pdb"),
-                                                        domains_dir)
-
-                    conf_domains = extract_residue_list(os.path.join(domains_dir,
-                                                                     f"{PurePosixPath(newname).stem}_domains.pdb"),
-                                                        domains_dir)
-                    l.info(f"Residue list of confident domains: {conf_domains}")
-        '''
         l.info(f"CONFIDENT FILES: {structures_for_query}")
         nrow = len(structures_for_query)
 
@@ -980,55 +798,76 @@ class Ui_ThirdWindow(object):
         self.pl.setup(self.plot_out)
         self.plot_out.show()
 
-    def onclick_topology(selected_fragments, n_clicks, output_dir, str_hinges_input):
+    def search(self):
+        global textboxValue
+        textboxValue = self.textEdit.toPlainText()
+        if textboxValue != '':
+            self.onclick_topology()
+        else:
+            self.warning_message = QtWidgets.QMainWindow()
+            self.warning_message.resize(488, 272)
+            self.label_message = QtWidgets.QLabel(self.warning_message)
+            self.label_message.setGeometry(QtCore.QRect(40, 90, 401, 61))
+            font = QtGui.QFont()
+            font.setFamily("Chandas")
+            font.setPointSize(14)
+            font.setBold(True)
+            font.setWeight(75)
+            self.label_message.setFont(font)
+            self.label_message.setText("WARNING: NO HINGES INTRODUCED")
+            self.warning_message.show()
+
+    def onclick_topology(self):
+        str_hinges_input = textboxValue
+        output_directory = output_dir
         structure_list = []
-        clicks = n_clicks
+        #clicks = n_clicks
         try:
-            for child in Path(os.path.join(output_dir, "PDB", "total")).iterdir():
+            for child in Path(os.path.join(output_dir, query_name, "PDB", "total")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    for name in selected_fragments:
+                    for name in self:
                         if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
                             structure_list.append(child)
         except:
             pass
 
         try:
-            for child in Path(os.path.join(output_dir, "PDB", "partial")).iterdir():
+            for child in Path(os.path.join(output_dir, query_name, "PDB", "partial")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    for name in selected_fragments:
+                    for name in self:
                         if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
                             structure_list.append(child)
         except:
             pass
 
         try:
-            for child in Path(os.path.join(output_dir, "PDB", "CHAINS")).iterdir():
+            for child in Path(os.path.join(output_dir, query_name, "PDB", "CHAINS")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    for name in selected_fragments:
+                    for name in self:
                         if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
                             structure_list.append(child)
         except:
             pass
 
         try:
-            for child in Path(os.path.join(output_dir, "ALPHAFOLD", "DOMAINS")).iterdir():
+            for child in Path(os.path.join(output_dir, query_name, "ALPHAFOLD", "DOMAINS")).iterdir():
                 if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
-                    for name in selected_fragments:
+                    for name in self:
                         if str(os.path.basename(child)[0:-4]) == str(os.path.basename(name)[0:-13]):
                             structure_list.append(child)
         except:
             pass
 
         try:
-            for child in Path(os.path.join(output_dir, "ROSETTAFOLD", "DOMAINS")).iterdir():
+            for child in Path(os.path.join(output_dir, query_name, "ROSETTAFOLD", "DOMAINS")).iterdir():
                 if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
-                    for name in selected_fragments:
+                    for name in self:
                         if str(os.path.basename(child)[0:-4]) == str(os.path.basename(name)[0:-13]):
                             structure_list.append(child)
         except:
             pass
 
-        fasta = "input_fasta/" + str(os.path.basename(output_dir)) + ".fasta"
+        fasta = "input_fasta/" + str(os.path.basename(query_name)) + ".fasta"
 
         rigid_bodies = make_rb_list(structure_list, fasta)
 
@@ -1048,10 +887,10 @@ class Ui_ThirdWindow(object):
         print(f"INITIAL = {len(rigid_bodies)}, FINAL = {len(final_rigid_bodies)}")
 
         final_rigid_bodies.sort(key=lambda x: x.residue_range[0])
-        str_out = str(output_dir)
+        str_out = str(os.path.join(output_dir, query_name))
         out_name = str_out.split("/")[-1]
         # Write the topology file
-        write_custom_topology(os.path.join(output_dir, "IMP", f"{out_name}_custom.topology"), final_rigid_bodies)
+        write_custom_topology(os.path.join(output_dir, query_name, "IMP", f"{out_name}_custom.topology"), final_rigid_bodies)
 
         return f"Topology file created with:{[str(rb.pdb_fn) for rb in final_rigid_bodies]}"
 
@@ -1118,6 +957,8 @@ class Ui_ThirdWindow(object):
         self.textEdit = QtWidgets.QTextEdit(self.SecondOutputWindow)
         self.textEdit.setGeometry(QtCore.QRect(250, 500, 201, 31))
         self.textEdit.setObjectName("textEdit")
+
+
         ThirdWindow.setCentralWidget(self.SecondOutputWindow)
         self.menubar = QtWidgets.QMenuBar(ThirdWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1059, 22))
@@ -1146,6 +987,7 @@ class Ui_ThirdWindow(object):
         self.retranslateUi(ThirdWindow)
         QtCore.QMetaObject.connectSlotsByName(ThirdWindow)
 
+
     def retranslateUi(self, ThirdWindow):
         _translate = QtCore.QCoreApplication.translate
         ThirdWindow.setWindowTitle(_translate("ThirdWindow", "ThirdWindow"))
@@ -1159,11 +1001,14 @@ class Ui_ThirdWindow(object):
         self.pushButton.clicked.connect(self.show_Compositeplot)
 
         self.pushButton_2.setText(_translate("ThirdWindow", "Generate IMP Topology File"))
+        self.pushButton_2.clicked.connect(self.search)
+
         self.menuPage_1.setTitle(_translate("ThirdWindow", "Page 1"))
         self.actionCoverage.setText(_translate("ThirdWindow", "Coverage"))
         self.actionHinges_and_Flexibility.setText(_translate("ThirdWindow", "Hinges and Flexibility"))
         self.actionComposite_and_Topology_File.setText(_translate("ThirdWindow", "Composite and Topology File"))
         self.actionCustom_hinges.setText(_translate("ThirdWindow", "Custom hinges"))
+
 
 
 
