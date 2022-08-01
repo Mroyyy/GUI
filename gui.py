@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
 from PyQt5.QtCore import QDir, QEventLoop, Qt, QUrl
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolicy, QGridLayout, QSpacerItem, \
-    QScrollArea, QWidget, QVBoxLayout, QLabel, QSizeGrip, QPlainTextEdit, QPushButton
+    QScrollArea, QWidget, QVBoxLayout, QLabel, QSizeGrip, QPlainTextEdit, QPushButton, QProgressBar
 
 ##########################
 # Ferran's script functions
@@ -37,14 +37,13 @@ from bin.custom_top import make_rb_list, make_composite, write_custom_topology
 import pandas as pd
 
 import os
-from bin.custom_top import  write_custom_topology
+from bin.custom_top import write_custom_topology
 from pathlib import Path
 
 # File management/OS
 from pathlib import Path, PurePosixPath
 
-
-#Plotting
+# Plotting
 # import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
@@ -54,12 +53,11 @@ import pandas as pd
 from dash import Dash, dcc, html, Input, Output, State
 import subprocess
 
-#Custom topology
+# Custom topology
 from bin.custom_top import make_rb_list
 
 import plotly.io as pio
 import plotly.express as px
-
 
 
 class Ui_MainWindow(object):
@@ -72,117 +70,227 @@ class Ui_MainWindow(object):
         self.ui.setupOutput(self.window)
         self.window.show()
 
-        #view.show()
+        # view.show()
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(1069, 614)
+        MainWindow.setSizeIncrement(QtCore.QSize(0, 0))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-
-        self.formLayoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.formLayoutWidget.setGeometry(QtCore.QRect(0, 0, 2, 2))
-        self.formLayoutWidget.setObjectName("formLayoutWidget")
-        self.formLayout = QtWidgets.QFormLayout(self.formLayoutWidget)
-        self.formLayout.setContentsMargins(0, 0, 0, 0)
-        self.formLayout.setObjectName("formLayout")
-
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(40, 40, 461, 41))
-        self.label.setObjectName("label")
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget) # START program
-        self.pushButton.setGeometry(QtCore.QRect(660, 40, 71, 61))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget) # Select fasta button
-        self.pushButton_2.setGeometry(QtCore.QRect(550, 40, 71, 61))
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(40, 120, 161, 31))
-        self.label_2.setObjectName("label_2")
-
-
-        self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(40, 240, 181, 31))
-        self.label_3.setObjectName("label_3")
-        self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(420, 120, 171, 31))
-        self.label_4.setObjectName("label_4")
-        self.label_5 = QtWidgets.QLabel(self.centralwidget)
-        self.label_5.setGeometry(QtCore.QRect(420, 170, 161, 31))
-        self.label_5.setObjectName("label_5")
-        self.label_6 = QtWidgets.QLabel(self.centralwidget)
-        self.label_6.setGeometry(QtCore.QRect(40, 180, 121, 31))
-        self.label_6.setObjectName("label_6")
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.verticalLayout_10 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_10.setObjectName("verticalLayout_10")
+        self.label_9 = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_9.setFont(font)
+        self.label_9.setObjectName("label_9")
+        self.verticalLayout_10.addWidget(self.label_9)
+        self.gridLayout_3.addLayout(self.verticalLayout_10, 0, 2, 1, 8)
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_7.setObjectName("verticalLayout_7")
+        self.toolButton_4 = QtWidgets.QToolButton(self.centralwidget)
+        self.toolButton_4.setObjectName("toolButton_4")
+        self.verticalLayout_7.addWidget(self.toolButton_4)
+        self.toolButton_5 = QtWidgets.QToolButton(self.centralwidget)
+        self.toolButton_5.setObjectName("toolButton_5")
+        self.verticalLayout_7.addWidget(self.toolButton_5)
+        self.toolButton_6 = QtWidgets.QToolButton(self.centralwidget)
+        self.toolButton_6.setObjectName("toolButton_6")
+        self.verticalLayout_7.addWidget(self.toolButton_6)
+        self.gridLayout_3.addLayout(self.verticalLayout_7, 2, 13, 1, 1)
+        self.gridLayout_2 = QtWidgets.QGridLayout()
+        self.gridLayout_2.setObjectName("gridLayout_2")
         self.label_7 = QtWidgets.QLabel(self.centralwidget)
-        self.label_7.setGeometry(QtCore.QRect(40, 300, 121, 31))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.label_7.setFont(font)
         self.label_7.setObjectName("label_7")
-        self.label_8 = QtWidgets.QLabel(self.centralwidget)
-        self.label_8.setGeometry(QtCore.QRect(420, 230, 121, 31))
-        self.label_8.setObjectName("label_8")
+        self.gridLayout_2.addWidget(self.label_7, 0, 0, 1, 1)
+        self.label_6 = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.label_6.setFont(font)
+        self.label_6.setObjectName("label_6")
+        self.gridLayout_2.addWidget(self.label_6, 1, 0, 1, 1)
+        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.label_5.setFont(font)
+        self.label_5.setObjectName("label_5")
+        self.gridLayout_2.addWidget(self.label_5, 2, 0, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_2, 2, 9, 1, 2)
+        self.gridLayout = QtWidgets.QGridLayout()
+        self.gridLayout.setObjectName("gridLayout")
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.label_4.setFont(font)
+        self.label_4.setObjectName("label_4")
+        self.gridLayout.addWidget(self.label_4, 4, 0, 1, 1)
+        self.label_2 = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.label_2.setFont(font)
+        self.label_2.setObjectName("label_2")
+        self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.label_3.setFont(font)
+        self.label_3.setObjectName("label_3")
+        self.gridLayout.addWidget(self.label_3, 3, 0, 1, 1)
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.label.setFont(font)
+        self.label.setObjectName("label")
+        self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout, 2, 1, 1, 4)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit.setGeometry(QtCore.QRect(220, 120, 113, 25))
+        self.lineEdit.setSizeIncrement(QtCore.QSize(0, 0))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(12)
+        font.setBold(False)
+        font.setWeight(50)
+        self.lineEdit.setFont(font)
         self.lineEdit.setObjectName("lineEdit")
+        self.verticalLayout.addWidget(self.lineEdit)
+        self.horizontalLayout_2.addLayout(self.verticalLayout)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.pushButton.setFont(font)
+        self.pushButton.setObjectName("pushButton")
+        self.horizontalLayout.addWidget(self.pushButton)
+        self.horizontalLayout_2.addLayout(self.horizontalLayout)
+        self.gridLayout_3.addLayout(self.horizontalLayout_2, 1, 0, 1, 14)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.label_8 = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setItalic(True)
+        self.label_8.setFont(font)
+        self.label_8.setObjectName("label_8")
+        self.verticalLayout_3.addWidget(self.label_8)
+        self.gridLayout_3.addLayout(self.verticalLayout_3, 6, 2, 1, 1)
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.lineEdit_2 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_2.setGeometry(QtCore.QRect(490, 230, 113, 25))
         self.lineEdit_2.setObjectName("lineEdit_2")
+        self.verticalLayout_4.addWidget(self.lineEdit_2)
         self.lineEdit_3 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_3.setGeometry(QtCore.QRect(160, 180, 113, 25))
         self.lineEdit_3.setObjectName("lineEdit_3")
+        self.verticalLayout_4.addWidget(self.lineEdit_3)
         self.lineEdit_4 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_4.setGeometry(QtCore.QRect(230, 240, 113, 25))
         self.lineEdit_4.setObjectName("lineEdit_4")
+        self.verticalLayout_4.addWidget(self.lineEdit_4)
         self.lineEdit_5 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_5.setGeometry(QtCore.QRect(170, 300, 113, 25))
         self.lineEdit_5.setObjectName("lineEdit_5")
+        self.verticalLayout_4.addWidget(self.lineEdit_5)
+        self.gridLayout_3.addLayout(self.verticalLayout_4, 2, 5, 1, 2)
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.horizontalLayout_3.addWidget(self.pushButton_2)
+        self.gridLayout_3.addLayout(self.horizontalLayout_3, 4, 12, 4, 3)
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
         self.lineEdit_6 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_6.setGeometry(QtCore.QRect(560, 180, 113, 25))
         self.lineEdit_6.setObjectName("lineEdit_6")
+        self.verticalLayout_5.addWidget(self.lineEdit_6)
         self.lineEdit_7 = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEdit_7.setGeometry(QtCore.QRect(600, 120, 113, 25))
         self.lineEdit_7.setObjectName("lineEdit_7")
-        self.lineEdit_8 = QtWidgets.QLineEdit(self.centralwidget) # Line where fasta path is printed
-        self.lineEdit_8.setGeometry(QtCore.QRect(30, 44, 491, 31))
-        self.lineEdit_8.setObjectName("lineEdit")
+        self.verticalLayout_5.addWidget(self.lineEdit_7)
+        self.lineEdit_8 = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEdit_8.setObjectName("lineEdit_8")
+        self.verticalLayout_5.addWidget(self.lineEdit_8)
+        self.gridLayout_3.addLayout(self.verticalLayout_5, 2, 11, 1, 2)
+        self.verticalLayout_6 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_6.setObjectName("verticalLayout_6")
+        self.toolButton_2 = QtWidgets.QToolButton(self.centralwidget)
+        self.toolButton_2.setObjectName("toolButton_2")
+        self.verticalLayout_6.addWidget(self.toolButton_2)
         self.toolButton = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton.setGeometry(QtCore.QRect(310, 120, 26, 24))
         self.toolButton.setObjectName("toolButton")
-
+        self.verticalLayout_6.addWidget(self.toolButton)
+        self.toolButton_3 = QtWidgets.QToolButton(self.centralwidget)
+        self.toolButton_3.setObjectName("toolButton_3")
+        self.verticalLayout_6.addWidget(self.toolButton_3)
+        self.toolButton_7 = QtWidgets.QToolButton(self.centralwidget)
+        self.toolButton_7.setObjectName("toolButton_7")
+        self.verticalLayout_6.addWidget(self.toolButton_7)
+        self.gridLayout_3.addLayout(self.verticalLayout_6, 2, 7, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1069, 22))
         self.menubar.setObjectName("menubar")
+        self.menuHelp = QtWidgets.QMenu(self.menubar)
+        self.menuHelp.setObjectName("menuHelp")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.actionHow_to_run_it = QtWidgets.QAction(MainWindow)
+        self.actionHow_to_run_it.setObjectName("actionHow_to_run_it")
+        self.actionInstructions = QtWidgets.QAction(MainWindow)
+        self.actionInstructions.setObjectName("actionInstructions")
+        self.menuHelp.addAction(self.actionHow_to_run_it)
+        self.menuHelp.addAction(self.actionInstructions)
+        self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.lineEdit_8.setText(_translate("MainWindow", "Select sequence file and output directory"))
-        # self.label.setText(_translate("MainWindow", "Select sequence file and output directory"))
-        self.pushButton.setText(_translate("MainWindow", "Select File"))
-        self.label_2.setText(_translate("MainWindow", "Output directory"))
-        self.label_3.setText(_translate("MainWindow", "RosettaFold (PDB format)*"))
-        self.label_4.setText(_translate("MainWindow", "AlphaFold PAE JSON file*"))
-        self.label_5.setText(_translate("MainWindow", "Custom templates*"))
-        self.label_6.setText(_translate("MainWindow", "Run AlphaFold*"))
-        self.label_7.setText(_translate("MainWindow", "Run RosettaFold*"))
-        self.label_8.setText(_translate("MainWindow", "AlphaFold (PDB format)*"))
-        self.toolButton.setText(_translate("MainWindow", "..."))
-        self.toolButton.clicked.connect(self.create_dir)
+        self.label_9.setText(
+            _translate("MainWindow", "Automated structural information retrieval for Integrative Modeling"))
+        self.toolButton_4.setText(_translate("MainWindow", "...")) # Custom templates
+        self.toolButton_5.setText(_translate("MainWindow", "...")) # Run RosettaFold
+        self.toolButton_6.setText(_translate("MainWindow", "...")) # RosettaFold model
+        self.toolButton_7.setText(_translate("MainWindow", "...")) # AlphaFold PAE JSON
+        self.label_7.setText(_translate("MainWindow", "Custom Templates*"))
+        self.label_6.setText(_translate("MainWindow", "Run RosettaFold*"))
+        self.label_5.setText(_translate("MainWindow", "RosettaFold (PDB format)*"))
+        self.label_4.setText(_translate("MainWindow", "Alphafold PAE JSON file*"))
+        self.label_2.setText(_translate("MainWindow", "Alphafold model*"))
+        self.label_3.setText(_translate("MainWindow", "Run AlphaFold*"))
+        self.label.setText(_translate("MainWindow", "Output directory"))
+        self.toolButton_2.setText(_translate("MainWindow", "...")) # Output directory
+        self.toolButton.setText(_translate("MainWindow", "...")) # Alphamodel
+        self.toolButton_3.setText(_translate("MainWindow", "...")) # Run AlphaFold
+        self.lineEdit.setText(_translate("MainWindow", "Select sequence file and output directory"))
+        self.pushButton.setText(_translate("MainWindow", "Select file"))
+        self.label_8.setText(_translate("MainWindow", "Arguments with * are not required (optional)"))
+        self.pushButton_2.setText(_translate("MainWindow", "START"))
+        self.menuHelp.setTitle(_translate("MainWindow", "Help"))
+        self.actionHow_to_run_it.setText(_translate("MainWindow", "How to run it?"))
+        self.actionInstructions.setText(_translate("MainWindow", "Instructions"))
 
+        self.toolButton_2.clicked.connect(self.create_dir)
 
-        self.pushButton.setText(_translate("MainWindow", "START"))
-        self.pushButton.clicked.connect(self.run)
+        self.pushButton_2.clicked.connect(self.run) # START BUTTON
         # click button and call function
-        self.pushButton_2.setText(_translate("MainWindow", "Select file"))
-        self.pushButton_2.clicked.connect(self.get_file)
-
+        self.pushButton.clicked.connect(self.get_file)
 
     def get_file(self):
         '''
@@ -199,10 +307,10 @@ class Ui_MainWindow(object):
         source = name
         file = open(name, 'r')
         query_name, fasta = list(file)
-        #query_name = print(list(file))
+        # query_name = print(list(file))
         query_name = query_name.replace(">", "").strip()
 
-        return self.lineEdit_8.setText(source), filename, query_name, fasta
+        return self.lineEdit.setText(source), filename, query_name, fasta
 
     def create_dir(self):
         '''
@@ -214,20 +322,33 @@ class Ui_MainWindow(object):
         name, _ = QFileDialog.getSaveFileName(None, 'QFileDialog.getSaveFileName()', "")
         output_dir = name
 
-        return self.lineEdit.setText(output_dir)
+        return self.lineEdit_2.setText(output_dir)
 
-    
+    '''
+    def openLog(self):
+
+
+            self.logwindow = QtWidgets.QMainWindow()
+            self.logwindow.resize(800, 400)
+            self.logwindow.show()
+
+
+            self.progressBar = QProgressBar(self.logwindow)
+            self.progressBar.setMinimum(0)
+            self.progressBar.setMaximum(n)
+
+
+    '''
 
     def run(self):
+
         # Set fasta path and outdir and wait until those variables are set
         verbose = True
-
 
         ### Initializing the LOG system ###
 
         logdir = os.path.join(output_dir, query_name, "LOG", "")
         Path(logdir).mkdir(parents=True, exist_ok=True)
-
         l.basicConfig(format="%(levelname)s:%(message)s",
                       filename=os.path.join(logdir, f"{query_name}.log"),
                       level=l.DEBUG)
@@ -395,9 +516,8 @@ class Ui_MainWindow(object):
         os.rmdir("obsolete")
         os.remove("DCI_pymol_output.txt")
 
-        MainWindow.hide()
+        # MainWindow.hide()
         ui.openWindow()
-
 
 
 class Ui_SecondWindow(object):
@@ -501,16 +621,16 @@ class Ui_SecondWindow(object):
                            margin_pad=10, barmode="group", legend=dict(orientation="h", y=-0.35))
         fig2.update_yaxes(showgrid=False, range=[0, 1], nticks=2)
 
-        png2 = pio.write_image(fig2, f"{output_dir}/{query_name}/hinges_prediction.png", scale=1, width=1400, height=700)
+        png2 = pio.write_image(fig2, f"{output_dir}/{query_name}/hinges_prediction.png", scale=1, width=1400,
+                               height=700)
 
         return fig2
-
 
     def openThirdWindow(self):
         '''
         Creates connection between input window and output window (second window)
         '''
-        #SecondWindow.hide()
+        # SecondWindow.hide()
         self.Thirdwindow = QtWidgets.QMainWindow()
         self.ui = Ui_ThirdWindow()
         self.ui.setupOutput(self.Thirdwindow)
@@ -607,14 +727,15 @@ class Ui_SecondWindow(object):
         self.retranslateUi(SecondWindow)
         QtCore.QMetaObject.connectSlotsByName(SecondWindow)
 
-
     def retranslateUi(self, SecondWindow):
         _translate = QtCore.QCoreApplication.translate
         SecondWindow.setWindowTitle(_translate("SecondWindow", "SecondWindow"))
-        self.label.setText(_translate("SecondWindow","<html><head/><body><p align=\"justify\">In this graph,you can see which parts of the reference FASTA sequence are covered by structure. This structures come from either the <a href=\"https://www.rcsb.org/\"><span style=\" text-decoration: underline; color:#0000ff;\">Protein Data Bank</span></a>, <a href=\"https://www.deepmind.com/blog/alphafold-a-solution-to-a-50-year-old-grand-challenge-in-biology\"><span style=\" text-decoration: underline; color:#0000ff;\">AlphaFold</span></a> models or <a href=\"https://www.ipd.uw.edu/2021/07/rosettafold-accurate-protein-structure-prediction-accessible-to-all/\"><span style=\" text-decoration: underline; color:#0000ff;\">RoseTTaFold</span></a> models.<br/></p></body></html>"))
+        self.label.setText(_translate("SecondWindow",
+                                      "<html><head/><body><p align=\"justify\">In this graph,you can see which parts of the reference FASTA sequence are covered by structure. This structures come from either the <a href=\"https://www.rcsb.org/\"><span style=\" text-decoration: underline; color:#0000ff;\">Protein Data Bank</span></a>, <a href=\"https://www.deepmind.com/blog/alphafold-a-solution-to-a-50-year-old-grand-challenge-in-biology\"><span style=\" text-decoration: underline; color:#0000ff;\">AlphaFold</span></a> models or <a href=\"https://www.ipd.uw.edu/2021/07/rosettafold-accurate-protein-structure-prediction-accessible-to-all/\"><span style=\" text-decoration: underline; color:#0000ff;\">RoseTTaFold</span></a> models.<br/></p></body></html>"))
         self.label_2.setText(_translate("SecondWindow", "COVERAGE"))
         self.label_3.setText(_translate("SecondWindow", "HINGES AND FLEXIBILITY"))
-        self.label_4.setText(_translate("SecondWindow","<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">Flexibility is an important feature of proteins, since they need to move to perform their function and interact with their substrates. In the following section, we provide you with two types of flexibility prediction: the Dynamic Flexibility Index and Hinge Prediction. The overlap of these two measures might be helpful for you, in case you wanted to modify the final topology file with some of these hinges.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-style:italic; color:#323232;\">Dynamic Flexibility Index</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>This is per-residue index indicating the contribution of each residue to the overall flexibility of the protein. It uses a method based in an Elastic Network Model (ENM), which is a more lightweight (but less precise, obviously) alternative to Molecular Dynamics. for more info, </span><a href=\"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673471/\"><span style=\" text-decoration: underline; color:#0000ff;\">here</span></a><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"> is the original paper.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-style:italic; color:#323232;\">Hinge Prediction</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>Hinges are the regions of the protein that allow it to move and change conformations. Using </span><a href=\"https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac007/6525212?login=true\"><span style=\" text-decoration: underline; color:#0000ff;\">this tool</span></a><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"> we provide you with some suggested hinge regions. Note that this information is only available for experimental structures. This is due to the use of ENM, it is not designed to work with predicted models that might contain important artifacts, and, in this case, that are split into the highly confidently predicted regions.</span></p><p><a name=\"modebar-338c4d\"/><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/></span></p></body></html>"))
+        self.label_4.setText(_translate("SecondWindow",
+                                        "<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">Flexibility is an important feature of proteins, since they need to move to perform their function and interact with their substrates. In the following section, we provide you with two types of flexibility prediction: the Dynamic Flexibility Index and Hinge Prediction. The overlap of these two measures might be helpful for you, in case you wanted to modify the final topology file with some of these hinges.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-style:italic; color:#323232;\">Dynamic Flexibility Index</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>This is per-residue index indicating the contribution of each residue to the overall flexibility of the protein. It uses a method based in an Elastic Network Model (ENM), which is a more lightweight (but less precise, obviously) alternative to Molecular Dynamics. for more info, </span><a href=\"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673471/\"><span style=\" text-decoration: underline; color:#0000ff;\">here</span></a><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"> is the original paper.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-style:italic; color:#323232;\">Hinge Prediction</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>Hinges are the regions of the protein that allow it to move and change conformations. Using </span><a href=\"https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac007/6525212?login=true\"><span style=\" text-decoration: underline; color:#0000ff;\">this tool</span></a><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"> we provide you with some suggested hinge regions. Note that this information is only available for experimental structures. This is due to the use of ENM, it is not designed to work with predicted models that might contain important artifacts, and, in this case, that are split into the highly confidently predicted regions.</span></p><p><a name=\"modebar-338c4d\"/><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/></span></p></body></html>"))
         self.pushButton.setText(_translate("SecondWindow", "Show plot"))
         self.pushButton.clicked.connect(self.show_plot)
 
@@ -623,7 +744,7 @@ class Ui_SecondWindow(object):
 
         self.pushButton_3.setText(_translate("SecondWindow", "Next"))
         self.pushButton_3.clicked.connect(self.openThirdWindow)
-
+        self.pushButton_3.clicked.connect(SecondWindow.hide)
 
         self.menuPage_1.setTitle(_translate("SecondWindow", "Page 1"))
         self.actionCoverage.setText(_translate("SecondWindow", "Coverage"))
@@ -636,6 +757,7 @@ class Ui_plot(object):
     '''
     set up window to show image of plot
     '''
+
     def setup(self, plotWindow):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
@@ -661,10 +783,12 @@ class Ui_plot(object):
         _translate = QtCore.QCoreApplication.translate
         plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
 
+
 class Ui_Secondplot(object):
     '''
     set up another window to show predicted hinges and flexibility plot
     '''
+
     def setup(self, plotWindow):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
@@ -690,10 +814,12 @@ class Ui_Secondplot(object):
         _translate = QtCore.QCoreApplication.translate
         plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
 
+
 class Ui_Thirdplot(object):
     '''
     set up another window to show predicted hinges and flexibility plot
     '''
+
     def setup(self, plotWindow):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
@@ -718,6 +844,7 @@ class Ui_Thirdplot(object):
     def retranslateUi(self, plotWindow):
         _translate = QtCore.QCoreApplication.translate
         plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
+
 
 class Ui_ThirdWindow(object):
     def update_dropdown(self):
@@ -821,7 +948,7 @@ class Ui_ThirdWindow(object):
         str_hinges_input = textboxValue
         output_directory = output_dir
         structure_list = []
-        #clicks = n_clicks
+        # clicks = n_clicks
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "total")).iterdir():
                 if child.is_file() and "composite" not in str(child):
@@ -890,7 +1017,8 @@ class Ui_ThirdWindow(object):
         str_out = str(os.path.join(output_dir, query_name))
         out_name = str_out.split("/")[-1]
         # Write the topology file
-        write_custom_topology(os.path.join(output_dir, query_name, "IMP", f"{out_name}_custom.topology"), final_rigid_bodies)
+        write_custom_topology(os.path.join(output_dir, query_name, "IMP", f"{out_name}_custom.topology"),
+                              final_rigid_bodies)
 
         return f"Topology file created with:{[str(rb.pdb_fn) for rb in final_rigid_bodies]}"
 
@@ -958,7 +1086,6 @@ class Ui_ThirdWindow(object):
         self.textEdit.setGeometry(QtCore.QRect(250, 500, 201, 31))
         self.textEdit.setObjectName("textEdit")
 
-
         ThirdWindow.setCentralWidget(self.SecondOutputWindow)
         self.menubar = QtWidgets.QMenuBar(ThirdWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1059, 22))
@@ -987,7 +1114,6 @@ class Ui_ThirdWindow(object):
         self.retranslateUi(ThirdWindow)
         QtCore.QMetaObject.connectSlotsByName(ThirdWindow)
 
-
     def retranslateUi(self, ThirdWindow):
         _translate = QtCore.QCoreApplication.translate
         ThirdWindow.setWindowTitle(_translate("ThirdWindow", "ThirdWindow"))
@@ -1010,8 +1136,6 @@ class Ui_ThirdWindow(object):
         self.actionCustom_hinges.setText(_translate("ThirdWindow", "Custom hinges"))
 
 
-
-
 if __name__ == "__main__":
     import sys
 
@@ -1024,8 +1148,5 @@ if __name__ == "__main__":
     loop = QEventLoop()
     loop.exec()  # waits
 
-
-
     sys.exit(app.exec_())
-
 
