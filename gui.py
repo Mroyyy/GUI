@@ -1,9 +1,9 @@
 import plotly
-from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QDir, QEventLoop, Qt, QUrl
-from PyQt5.QtGui import QPixmap, QKeySequence
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolicy, QGridLayout, QSpacerItem, \
-    QScrollArea, QWidget, QVBoxLayout, QLabel, QSizeGrip, QPlainTextEdit, QPushButton, QProgressBar
+    QScrollArea, QWidget, QVBoxLayout, QLabel, QSizeGrip, QPlainTextEdit, QPushButton
 
 ##########################
 # Ferran's script functions
@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolic
 
 import Bio.SeqIO as IO
 # from custom_parser import parser
-from PySide2.QtWebEngineWidgets import QWebEngineView
+
 from matplotlib.backends.backend_template import FigureCanvas
 from plotly.subplots import make_subplots
 from pygments.lexers import go
@@ -37,13 +37,14 @@ from bin.custom_top import make_rb_list, make_composite, write_custom_topology
 import pandas as pd
 
 import os
-from bin.custom_top import write_custom_topology
+from bin.custom_top import  write_custom_topology
 from pathlib import Path
 
 # File management/OS
 from pathlib import Path, PurePosixPath
 
-# Plotting
+
+#Plotting
 # import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
@@ -53,11 +54,13 @@ import pandas as pd
 from dash import Dash, dcc, html, Input, Output, State
 import subprocess
 
-# Custom topology
+#Custom topology
 from bin.custom_top import make_rb_list
 
 import plotly.io as pio
 import plotly.express as px
+
+
 
 
 
@@ -123,6 +126,7 @@ class Ui_MainWindow(object):
         self.help.show()
 
     def setupUi(self, MainWindow):
+
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1069, 614)
         MainWindow.setSizeIncrement(QtCore.QSize(0, 0))
@@ -375,34 +379,19 @@ class Ui_MainWindow(object):
 
         return self.lineEdit_2.setText(output_dir)
 
-    '''
-    def openLog(self):
-
-
-            self.logwindow = QtWidgets.QMainWindow()
-            self.logwindow.resize(800, 400)
-            self.logwindow.show()
-
-
-            self.progressBar = QProgressBar(self.logwindow)
-            self.progressBar.setMinimum(0)
-            self.progressBar.setMaximum(n)
-
-
-    '''
-
     def run(self):
 
         # Set fasta path and outdir and wait until those variables are set
         verbose = True
 
         ### Initializing the LOG system ###
-
+        global logdir
         logdir = os.path.join(output_dir, query_name, "LOG", "")
         Path(logdir).mkdir(parents=True, exist_ok=True)
         l.basicConfig(format="%(levelname)s:%(message)s",
                       filename=os.path.join(logdir, f"{query_name}.log"),
-                      level=l.DEBUG)
+                      level = l.DEBUG)
+
 
         l.debug("...STARTING...\n")
 
@@ -513,6 +502,8 @@ class Ui_MainWindow(object):
                             Path(directory).mkdir(parents=True, exist_ok=True)
                             shutil.move(chain_path, newpath)
                             structures_for_query.append(newpath)
+
+
 
         l.info(f"CONFIDENT FILES: {structures_for_query}")
         nrow = len(structures_for_query)
@@ -682,10 +673,11 @@ class Ui_SecondWindow(object):
         Creates connection between input window and output window (second window)
         '''
         # SecondWindow.hide()
-        self.Thirdwindow = QtWidgets.QMainWindow()
+        self.Thirdwindow2 = QtWidgets.QMainWindow()
         self.ui = Ui_ThirdWindow()
-        self.ui.setupOutput(self.Thirdwindow)
-        self.Thirdwindow.show()
+        self.ui.setupOutput(self.Thirdwindow2)
+        self.Thirdwindow2.show()
+
 
     def setupOutput(self, SecondWindow):
         '''
@@ -976,6 +968,13 @@ class Ui_ThirdWindow(object):
         self.pl.setup(self.plot_out)
         self.plot_out.show()
 
+    def close_third(self, main_w):
+        main_w.hide()
+        self.returnsecond = QtWidgets.QMainWindow()
+        self.s = Ui_SecondWindow()
+        self.s.setupOutput(self.returnsecond)
+        self.returnsecond.show()
+
     def search(self):
         global textboxValue
         textboxValue = self.textEdit.toPlainText()
@@ -1133,6 +1132,13 @@ class Ui_ThirdWindow(object):
         font.setPointSize(10)
         self.pushButton_2.setFont(font)
         self.pushButton_2.setObjectName("pushButton_2")
+        self.pushButton_3 = QtWidgets.QPushButton(self.SecondOutputWindow, clicked = lambda: self.close_third(ThirdWindow))
+        self.pushButton_3.setGeometry(QtCore.QRect(888, 600, 101, 31))
+        font = QtGui.QFont()
+        font.setFamily("Chandas")
+        font.setPointSize(10)
+        self.pushButton_3.setFont(font)
+        self.pushButton_3.setObjectName("pushButton")
         self.textEdit = QtWidgets.QTextEdit(self.SecondOutputWindow)
         self.textEdit.setGeometry(QtCore.QRect(250, 500, 201, 31))
         self.textEdit.setObjectName("textEdit")
@@ -1165,11 +1171,12 @@ class Ui_ThirdWindow(object):
         self.retranslateUi(ThirdWindow)
         QtCore.QMetaObject.connectSlotsByName(ThirdWindow)
 
+
     def retranslateUi(self, ThirdWindow):
         _translate = QtCore.QCoreApplication.translate
         ThirdWindow.setWindowTitle(_translate("ThirdWindow", "ThirdWindow"))
         self.label.setText(_translate("ThirdWindow",
-                                      "<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">From all the structures retrieved by the program and provided by the user, the program generates this composite, trying to cover as much of the reference sequence as possible, avoiding overlaps.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">This comopsite can be used to automatically build an </span><a href=\"https://integrativemodeling.org/2.5.0/doc/ref/classIMP_1_1pmi_1_1topology_1_1TopologyReader.html\"><span style=\" text-decoration: underline; color:#0000ff;\">IMP topology file</span></a></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">If you want to generate another topology file, with your custom choice of fragments, simply select the fragments woy want to include and click the button &quot;Create Topology File&quot;. it will save yhe output inj the folder IMP of your selected output folder.</span></p></body></html>"))
+                                      "<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">From all the structures retrieved by the program and provided by the user, the program generates this composite, trying to cover as much of the reference sequence as possible, avoiding overlaps.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">This composite can be used to automatically build an </span><a href=\"https://integrativemodeling.org/2.5.0/doc/ref/classIMP_1_1pmi_1_1topology_1_1TopologyReader.html\"><span style=\" text-decoration: underline; color:#0000ff;\">IMP topology file</span></a></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">If you want to generate another topology file, with your custom choice of fragments, simply select the fragments you want to include and click the button &quot;Create Topology File&quot;. it will save yhe output inj the folder IMP of your selected output folder.</span></p></body></html>"))
         self.label_2.setText(_translate("ThirdWindow", "COMPOSITE AND TOPOLOGY FILE"))
         self.label_3.setText(_translate("ThirdWindow", "CUSTOM HINGES"))
         self.label_4.setText(_translate("ThirdWindow",
@@ -1179,12 +1186,16 @@ class Ui_ThirdWindow(object):
 
         self.pushButton_2.setText(_translate("ThirdWindow", "Generate IMP Topology File"))
         self.pushButton_2.clicked.connect(self.search)
+        self.pushButton_3.setText(_translate("MainWindow", "Return"))
+
 
         self.menuPage_1.setTitle(_translate("ThirdWindow", "Page 1"))
         self.actionCoverage.setText(_translate("ThirdWindow", "Coverage"))
         self.actionHinges_and_Flexibility.setText(_translate("ThirdWindow", "Hinges and Flexibility"))
         self.actionComposite_and_Topology_File.setText(_translate("ThirdWindow", "Composite and Topology File"))
         self.actionCustom_hinges.setText(_translate("ThirdWindow", "Custom hinges"))
+
+
 
 
 if __name__ == "__main__":
@@ -1199,5 +1210,8 @@ if __name__ == "__main__":
     loop = QEventLoop()
     loop.exec()  # waits
 
+
+
     sys.exit(app.exec_())
+
 
