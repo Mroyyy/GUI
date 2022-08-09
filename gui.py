@@ -1,5 +1,5 @@
 import plotly
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
 from PyQt5.QtCore import QDir, QEventLoop, Qt, QUrl
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolicy, QGridLayout, QSpacerItem, \
@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolic
 
 import Bio.SeqIO as IO
 # from custom_parser import parser
+
 
 from matplotlib.backends.backend_template import FigureCanvas
 from plotly.subplots import make_subplots
@@ -568,6 +569,7 @@ class Ui_SecondWindow(object):
         Connection function: show coverage plot
         Calls update_graph() at the beginning in order to save the image and then show it
         '''
+
         self.update_graph()
         self.plot_out = QtWidgets.QMainWindow()
         self.pl = Ui_plot()
@@ -591,6 +593,7 @@ class Ui_SecondWindow(object):
         :return: coverage plot
         '''
         global fig1
+        global png1_html
         global query_name
         i = 0
         df_list = []
@@ -620,6 +623,7 @@ class Ui_SecondWindow(object):
 
         # function that saves image as .png
         png1 = pio.write_image(fig1, f"{output_dir}/{query_name}/coverage_plot.png", scale=1, width=1400, height=700)
+        png1_html = pio.write_html(fig1, f"{output_dir}/{query_name}/coverage_plot.html")
 
         return fig1
 
@@ -665,6 +669,7 @@ class Ui_SecondWindow(object):
 
         png2 = pio.write_image(fig2, f"{output_dir}/{query_name}/hinges_prediction.png", scale=1, width=1400,
                                height=700)
+        png2_html = pio.write_html(fig2, f"{output_dir}/{query_name}/hinges_prediction.html")
 
         return fig2
 
@@ -805,11 +810,15 @@ class Ui_plot(object):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
         self.plotwindow.setObjectName("plotwindow")
-        self.label = QtWidgets.QLabel(self.plotwindow)
-        self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
-        self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/coverage_plot.png"))
-        self.label.setObjectName("label")
+        #self.label = QtWidgets.QLabel(self.plotwindow)
+        #self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
+        #self.label.setText("")
+        self.m_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
+        self.m_output.setGeometry(0, -10, 1391, 721)
+        url = QtCore.QUrl.fromLocalFile(f"{output_dir}/{query_name}/coverage_plot.html")
+        self.m_output.load(url)
+        #self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/coverage_plot.png"))
+        #self.label.setObjectName("label")
         plotWindow.setCentralWidget(self.plotwindow)
         self.menubar = QtWidgets.QMenuBar(plotWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
@@ -836,11 +845,15 @@ class Ui_Secondplot(object):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
         self.plotwindow.setObjectName("plotwindow")
-        self.label = QtWidgets.QLabel(self.plotwindow)
-        self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
-        self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/hinges_prediction.png"))
-        self.label.setObjectName("label")
+        self.s_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
+        self.s_output.setGeometry(0, -10, 1391, 721)
+        url = QtCore.QUrl.fromLocalFile(f"{output_dir}/{query_name}/hinges_prediction.html")
+        self.s_output.load(url)
+        #self.label = QtWidgets.QLabel(self.plotwindow)
+        #self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
+        #self.label.setText("")
+        #self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/hinges_prediction.png"))
+        #self.label.setObjectName("label")
         plotWindow.setCentralWidget(self.plotwindow)
         self.menubar = QtWidgets.QMenuBar(plotWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
@@ -867,11 +880,15 @@ class Ui_Thirdplot(object):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
         self.plotwindow.setObjectName("plotwindow")
-        self.label = QtWidgets.QLabel(self.plotwindow)
-        self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
-        self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/structure_plot.png"))
-        self.label.setObjectName("label")
+        self.m_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
+        self.m_output.setGeometry(0, -10, 1391, 721)
+        url = QtCore.QUrl.fromLocalFile(f"{output_dir}/{query_name}/structure_plot.html")
+        self.m_output.load(url)
+        #self.label = QtWidgets.QLabel(self.plotwindow)
+        #self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
+        #self.label.setText("")
+        #self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/structure_plot.png"))
+        #self.label.setObjectName("label")
         plotWindow.setCentralWidget(self.plotwindow)
         self.menubar = QtWidgets.QMenuBar(plotWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
@@ -953,6 +970,8 @@ class Ui_ThirdWindow(object):
         fig4.update_yaxes(showgrid=False, range=[0, 1], showticklabels=False)
 
         png4 = pio.write_image(fig4, f"{output_dir}/{query_name}/structure_plot.png", scale=1, width=1400, height=700)
+        png4_html = pio.write_html(fig4, f"{output_dir}/{query_name}/structure_plot.html")
+
 
         return fig4
 
