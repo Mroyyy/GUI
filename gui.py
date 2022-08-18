@@ -306,6 +306,7 @@ class Ui_MainWindow(object):
         self.actionHelp = QtWidgets.QAction(MainWindow)
         self.actionHelp.setObjectName("actionHelp")
         self.actionHelp.triggered.connect(self.show_help)
+        self.actionHelp.setShortcut("Ctrl+H")
 
 
         self.menuHelp.addAction(self.actionHelp)
@@ -794,7 +795,7 @@ class Ui_SecondWindow(object):
         self.pushButton_3.clicked.connect(self.openThirdWindow)
         self.pushButton_3.clicked.connect(SecondWindow.hide)
 
-        self.menuPage_1.setTitle(_translate("SecondWindow", "Page 1"))
+        self.menuPage_1.setTitle(_translate("SecondWindow", ""))
         self.actionCoverage.setText(_translate("SecondWindow", "Coverage"))
         self.actionHinges_and_Flexibility.setText(_translate("SecondWindow", "Hinges and Flexibility"))
         self.actionComposite_and_Topology_File.setText(_translate("SecondWindow", "Composite and Topology File"))
@@ -1208,7 +1209,7 @@ class Ui_ThirdWindow(object):
         self.pushButton_3.setText(_translate("MainWindow", "Return"))
 
 
-        self.menuPage_1.setTitle(_translate("ThirdWindow", "Page 1"))
+        self.menuPage_1.setTitle(_translate("ThirdWindow", ""))
         self.actionCoverage.setText(_translate("ThirdWindow", "Coverage"))
         self.actionHinges_and_Flexibility.setText(_translate("ThirdWindow", "Hinges and Flexibility"))
         self.actionComposite_and_Topology_File.setText(_translate("ThirdWindow", "Composite and Topology File"))
