@@ -996,9 +996,14 @@ class Ui_ThirdWindow(object):
         self.returnsecond.show()
 
     def search(self):
+        '''
+        Retrieve structures we want to include in our composite
+        '''
         global textboxValue
+        global textbox
         textboxValue = self.textEdit.toPlainText()
-        if textboxValue != '':
+        textbox = self.textEdit_2.toPlainText()
+        if textboxValue != '' or textbox != '':
             self.onclick_topology()
         else:
             self.warning_message = QtWidgets.QMainWindow()
@@ -1014,16 +1019,20 @@ class Ui_ThirdWindow(object):
             self.label_message.setText("WARNING: NO HINGES INTRODUCED")
             self.warning_message.show()
 
+
     def onclick_topology(self):
-        str_hinges_input = textboxValue
+        str_hinges_input = textbox
+        selected_fragments = textboxValue
         output_directory = output_dir
         structure_list = []
+        print(str_hinges_input)
+        print(selected_fragments)
         # clicks = n_clicks
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "total")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    for name in self:
-                        if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
+                    for name in selected_fragments:
+                        if os.path.basename(child)[0:-4] == selected_fragments:
                             structure_list.append(child)
         except:
             pass
@@ -1031,17 +1040,19 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "partial")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    for name in self:
-                        if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
-                            structure_list.append(child)
+                    #for name in selected_fragments:
+                    if os.path.basename(child)[0:-4] == selected_fragments:
+                        structure_list.append(child)
+
+
         except:
             pass
 
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "CHAINS")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    for name in self:
-                        if os.path.basename(child)[0:-4] == os.path.basename(name)[0:-13]:
+                    for name in selected_fragments:
+                        if os.path.basename(child)[0:-4] == selected_fragments:
                             structure_list.append(child)
         except:
             pass
@@ -1049,8 +1060,8 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "ALPHAFOLD", "DOMAINS")).iterdir():
                 if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
-                    for name in self:
-                        if str(os.path.basename(child)[0:-4]) == str(os.path.basename(name)[0:-13]):
+                    for name in selected_fragments:
+                        if str(os.path.basename(child)[0:-4]) == str(selected_fragments):
                             structure_list.append(child)
         except:
             pass
@@ -1058,8 +1069,8 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "ROSETTAFOLD", "DOMAINS")).iterdir():
                 if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
-                    for name in self:
-                        if str(os.path.basename(child)[0:-4]) == str(os.path.basename(name)[0:-13]):
+                    for name in selected_fragments:
+                        if str(os.path.basename(child)[0:-4]) == str(selected_fragments):
                             structure_list.append(child)
         except:
             pass
@@ -1162,6 +1173,20 @@ class Ui_ThirdWindow(object):
         self.textEdit = QtWidgets.QTextEdit(self.SecondOutputWindow)
         self.textEdit.setGeometry(QtCore.QRect(250, 500, 201, 31))
         self.textEdit.setObjectName("textEdit")
+        self.textEdit_2 = QtWidgets.QTextEdit(self.SecondOutputWindow)
+        self.textEdit_2.setGeometry(QtCore.QRect(250, 560, 201, 31))
+        self.textEdit_2.setObjectName("textEdit_2")
+        font2 = QtGui.QFont()
+        font2.setFamily("Open Sans")
+        font2.setPointSize(10)
+        self.label_5 = QtWidgets.QLabel(self.SecondOutputWindow)
+        self.label_5.setGeometry(QtCore.QRect(90, 560, 151, 31))
+        self.label_5.setFont(font2)
+        self.label_5.setObjectName("label")
+        self.label_6 = QtWidgets.QLabel(self.SecondOutputWindow)
+        self.label_6.setGeometry(QtCore.QRect(90, 500, 151, 31))
+        self.label_6.setFont(font2)
+        self.label_6.setObjectName("label")
 
         ThirdWindow.setCentralWidget(self.SecondOutputWindow)
         self.menubar = QtWidgets.QMenuBar(ThirdWindow)
@@ -1200,7 +1225,9 @@ class Ui_ThirdWindow(object):
         self.label_2.setText(_translate("ThirdWindow", "COMPOSITE AND TOPOLOGY FILE"))
         self.label_3.setText(_translate("ThirdWindow", "CUSTOM HINGES"))
         self.label_4.setText(_translate("ThirdWindow",
-                                        "<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">In this section you can introduce hinge regions. Hinge regions are those regions of the protein that bend, allowing the movement of the more rigid domains, which is essential for the interaciton of the proteins with other biomolecules.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-weight:600; color:#323232;\">How are hinges encoded?</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>Let\'s imagine you have a proterin of 200 amino acids. The DFI and PACKMAN hinge prediction are indicating a putative hinge region between positions 50 and 100 and another one between 120 and 130.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">In the box, you will need to introduce the hinges with the following format: 50:100,120:130</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">The program will split the structures, in the topology file, according to the hinges introduced.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">Topology file created with:</span></p></body></html>"))
+                                        "<html><head/><body><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">In this section you can introduce hinge regions. Hinge regions are those regions of the protein that bend, allowing the movement of the more rigid domains, which is essential for the interaciton of the proteins with other biomolecules.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; font-weight:600; color:#323232;\">How are hinges encoded?</span><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\"><br/>Let\'s imagine you have a proterin of 200 amino acids. The DFI and PACKMAN hinge prediction are indicating a putative hinge region between positions 50 and 100 and another one between 120 and 130.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">In the box, you will need to introduce the hinges with the following format: 50:100,120:130</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;\">The program will split the structures, in the topology file, according to the hinges introduced.</span></p><p align=\"justify\"><span style=\" font-family:\'Open Sans,HelveticaNeue,Helvetica Neue,Helvetica,Arial,sans-serif\'; font-size:15px; color:#323232;"))
+        self.label_5.setText(_translate("MainWindow", "Selected fragments:"))
+        self.label_6.setText(_translate("MainWindow", "Selected structures:"))
         self.pushButton.setText(_translate("ThirdWindow", "Show plot"))
         self.pushButton.clicked.connect(self.show_Compositeplot)
 
