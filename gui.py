@@ -1031,9 +1031,9 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "total")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    for name in selected_fragments:
-                        if os.path.basename(child)[0:-4] == selected_fragments:
-                            structure_list.append(child)
+                    #for name in selected_fragments:
+                    if os.path.basename(child)[0:-4] == selected_fragments:
+                        structure_list.append(child)
         except:
             pass
 
@@ -1051,27 +1051,27 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "CHAINS")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    for name in selected_fragments:
-                        if os.path.basename(child)[0:-4] == selected_fragments:
-                            structure_list.append(child)
+                    #for name in selected_fragments:
+                    if os.path.basename(child)[0:-4] == selected_fragments:
+                        structure_list.append(child)
         except:
             pass
 
         try:
             for child in Path(os.path.join(output_dir, query_name, "ALPHAFOLD", "DOMAINS")).iterdir():
                 if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
-                    for name in selected_fragments:
-                        if str(os.path.basename(child)[0:-4]) == str(selected_fragments):
-                            structure_list.append(child)
+                    #for name in selected_fragments:
+                    if str(os.path.basename(child)[0:-4]) == str(selected_fragments):
+                        structure_list.append(child)
         except:
             pass
 
         try:
             for child in Path(os.path.join(output_dir, query_name, "ROSETTAFOLD", "DOMAINS")).iterdir():
                 if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
-                    for name in selected_fragments:
-                        if str(os.path.basename(child)[0:-4]) == str(selected_fragments):
-                            structure_list.append(child)
+                    #for name in selected_fragments:
+                    if str(os.path.basename(child)[0:-4]) == str(selected_fragments):
+                        structure_list.append(child)
         except:
             pass
 
