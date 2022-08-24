@@ -1,7 +1,6 @@
-import plotly
+# Pyqt5 import functions
 from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
 from PyQt5.QtCore import QDir, QEventLoop, Qt, QUrl
-from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolicy, QGridLayout, QSpacerItem, \
     QScrollArea, QWidget, QVBoxLayout, QLabel, QSizeGrip, QPlainTextEdit, QPushButton
 
@@ -12,7 +11,7 @@ from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolic
 import Bio.SeqIO as IO
 # from custom_parser import parser
 
-
+import plotly
 from matplotlib.backends.backend_template import FigureCanvas
 from plotly.subplots import make_subplots
 from pygments.lexers import go
@@ -62,11 +61,11 @@ import plotly.io as pio
 import plotly.express as px
 
 
-
-
-
 class Ui_HelpWindow(object):
-
+    '''
+    Set up Help Window to provide a step by step usage
+    Shortcut: Ctrl + H
+    '''
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1150, 610)
@@ -118,16 +117,19 @@ class Ui_MainWindow(object):
         self.ui.setupOutput(self.window)
         self.window.show()
 
-        # view.show()
-
     def show_help(self):
+        '''
+        Opens Ui_HelpWindow
+        '''
         self.help = QtWidgets.QMainWindow()
         self.hlp = Ui_HelpWindow()
         self.hlp.setupUi(self.help)
         self.help.show()
 
     def setupUi(self, MainWindow):
-
+        '''
+        Set up Main Window where files and output are selected
+        '''
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1069, 614)
         MainWindow.setSizeIncrement(QtCore.QSize(0, 0))
@@ -342,9 +344,7 @@ class Ui_MainWindow(object):
         self.actionHelp.setText(_translate("MainWindow", "Help"))
         self.actionHelp.setShortcut("Ctrl+H")
 
-
         self.toolButton_2.clicked.connect(self.create_dir)
-
         self.pushButton_2.clicked.connect(self.run) # START BUTTON
         # click button and call function
         self.pushButton.clicked.connect(self.get_file)
@@ -382,12 +382,15 @@ class Ui_MainWindow(object):
         return self.lineEdit_2.setText(output_dir)
 
     def run(self):
-
-        # Set fasta path and outdir and wait until those variables are set
+        '''
+        Main program/function
+        :return: Atomic structure composite
+        '''
         verbose = True
 
         ### Initializing the LOG system ###
         global logdir
+        global plot_dir
         logdir = os.path.join(output_dir, query_name, "LOG", "")
         Path(logdir).mkdir(parents=True, exist_ok=True)
         l.basicConfig(format="%(levelname)s:%(message)s",
@@ -419,6 +422,7 @@ class Ui_MainWindow(object):
         report_dir = os.path.join(output_dir, query_name, "REPORT", "")
         hinges_dir = os.path.join(output_dir, query_name, "HINGES", "")
         IMP_dir = os.path.join(output_dir, query_name, "IMP", "")
+        plot_dir = os.path.join(output_dir, query_name, "PLOTS", "")
         l.info(f"{pdb_dir}, {fasta_dir}, {report_dir}, {hinges_dir}, {IMP_dir} .")
 
         Path(blast_dir).mkdir(parents=True, exist_ok=True)
@@ -427,6 +431,8 @@ class Ui_MainWindow(object):
         Path(report_dir).mkdir(parents=True, exist_ok=True)
         Path(hinges_dir).mkdir(parents=True, exist_ok=True)
         Path(IMP_dir).mkdir(parents=True, exist_ok=True)
+        Path(plot_dir).mkdir(parents=True, exist_ok=True)
+
 
         ## 1. Check if the input sequence is already in the PDB
 
@@ -527,7 +533,7 @@ class Ui_MainWindow(object):
 
         composite_rb = make_composite(rigid_bodies)
 
-        # Exprt the composite coverage in .csv
+        # Export the composite coverage in .csv
         out_path = os.path.join(report_dir, "COVERAGE", f"{query_name}_composite_coverage.csv")
         i = 0
         for rb in composite_rb:
@@ -560,7 +566,6 @@ class Ui_MainWindow(object):
         os.rmdir("obsolete")
         os.remove("DCI_pymol_output.txt")
 
-        # MainWindow.hide()
         ui.openWindow()
 
 
@@ -623,8 +628,8 @@ class Ui_SecondWindow(object):
         fig1.update_yaxes(showgrid=False, range=[0, 1], showticklabels=False)
 
         # function that saves image as .png
-        png1 = pio.write_image(fig1, f"{output_dir}/{query_name}/coverage_plot.png", scale=1, width=1400, height=700)
-        png1_html = pio.write_html(fig1, f"{output_dir}/{query_name}/coverage_plot.html")
+        png1 = pio.write_image(fig1, f"{plot_dir}/coverage_plot.png", scale=1, width=1400, height=700)
+        png1_html = pio.write_html(fig1, f"{plot_dir}/coverage_plot.html")
 
         return fig1
 
@@ -668,9 +673,9 @@ class Ui_SecondWindow(object):
                            margin_pad=10, barmode="group", legend=dict(orientation="h", y=-0.35))
         fig2.update_yaxes(showgrid=False, range=[0, 1], nticks=2)
 
-        png2 = pio.write_image(fig2, f"{output_dir}/{query_name}/hinges_prediction.png", scale=1, width=1400,
+        png2 = pio.write_image(fig2, f"{plot_dir}/hinges_prediction.png", scale=1, width=1400,
                                height=700)
-        png2_html = pio.write_html(fig2, f"{output_dir}/{query_name}/hinges_prediction.html")
+        png2_html = pio.write_html(fig2, f"{plot_dir}/hinges_prediction.html")
 
         return fig2
 
@@ -678,7 +683,6 @@ class Ui_SecondWindow(object):
         '''
         Creates connection between input window and output window (second window)
         '''
-        # SecondWindow.hide()
         self.Thirdwindow2 = QtWidgets.QMainWindow()
         self.ui = Ui_ThirdWindow()
         self.ui.setupOutput(self.Thirdwindow2)
@@ -811,15 +815,10 @@ class Ui_plot(object):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
         self.plotwindow.setObjectName("plotwindow")
-        #self.label = QtWidgets.QLabel(self.plotwindow)
-        #self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
-        #self.label.setText("")
         self.m_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
         self.m_output.setGeometry(0, -10, 1391, 721)
-        url = QtCore.QUrl.fromLocalFile(f"{output_dir}/{query_name}/coverage_plot.html")
+        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/coverage_plot.html")
         self.m_output.load(url)
-        #self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/coverage_plot.png"))
-        #self.label.setObjectName("label")
         plotWindow.setCentralWidget(self.plotwindow)
         self.menubar = QtWidgets.QMenuBar(plotWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
@@ -841,20 +840,14 @@ class Ui_Secondplot(object):
     '''
     set up another window to show predicted hinges and flexibility plot
     '''
-
     def setup(self, plotWindow):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
         self.plotwindow.setObjectName("plotwindow")
         self.s_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
         self.s_output.setGeometry(0, -10, 1391, 721)
-        url = QtCore.QUrl.fromLocalFile(f"{output_dir}/{query_name}/hinges_prediction.html")
+        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/hinges_prediction.html")
         self.s_output.load(url)
-        #self.label = QtWidgets.QLabel(self.plotwindow)
-        #self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
-        #self.label.setText("")
-        #self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/hinges_prediction.png"))
-        #self.label.setObjectName("label")
         plotWindow.setCentralWidget(self.plotwindow)
         self.menubar = QtWidgets.QMenuBar(plotWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
@@ -876,20 +869,14 @@ class Ui_Thirdplot(object):
     '''
     set up another window to show predicted hinges and flexibility plot
     '''
-
     def setup(self, plotWindow):
         plotWindow.resize(1400, 733)
         self.plotwindow = QtWidgets.QWidget(plotWindow)
         self.plotwindow.setObjectName("plotwindow")
         self.m_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
         self.m_output.setGeometry(0, -10, 1391, 721)
-        url = QtCore.QUrl.fromLocalFile(f"{output_dir}/{query_name}/structure_plot.html")
+        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/structure_plot.html")
         self.m_output.load(url)
-        #self.label = QtWidgets.QLabel(self.plotwindow)
-        #self.label.setGeometry(QtCore.QRect(0, -10, 1391, 721))
-        #self.label.setText("")
-        #self.label.setPixmap(QtGui.QPixmap(f"{output_dir}/{query_name}/structure_plot.png"))
-        #self.label.setObjectName("label")
         plotWindow.setCentralWidget(self.plotwindow)
         self.menubar = QtWidgets.QMenuBar(plotWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
@@ -970,8 +957,8 @@ class Ui_ThirdWindow(object):
         fig4.update_layout(title_text="Coverage")
         fig4.update_yaxes(showgrid=False, range=[0, 1], showticklabels=False)
 
-        png4 = pio.write_image(fig4, f"{output_dir}/{query_name}/structure_plot.png", scale=1, width=1400, height=700)
-        png4_html = pio.write_html(fig4, f"{output_dir}/{query_name}/structure_plot.html")
+        png4 = pio.write_image(fig4, f"{plot_dir}/structure_plot.png", scale=1, width=1400, height=700)
+        png4_html = pio.write_html(fig4, f"{plot_dir}/structure_plot.html")
 
 
         return fig4
@@ -1021,17 +1008,18 @@ class Ui_ThirdWindow(object):
 
 
     def onclick_topology(self):
+        '''
+        Retrieve fragments and hinges selected and create custom topology file
+        '''
         str_hinges_input = textbox
         selected_fragments = textboxValue
         output_directory = output_dir
         structure_list = []
         print(str_hinges_input)
         print(selected_fragments)
-        # clicks = n_clicks
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "total")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    #for name in selected_fragments:
                     if os.path.basename(child)[0:-4] == selected_fragments:
                         structure_list.append(child)
         except:
@@ -1040,7 +1028,6 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "partial")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    #for name in selected_fragments:
                     if os.path.basename(child)[0:-4] == selected_fragments:
                         structure_list.append(child)
 
@@ -1051,7 +1038,6 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "PDB", "CHAINS")).iterdir():
                 if child.is_file() and "composite" not in str(child):
-                    #for name in selected_fragments:
                     if os.path.basename(child)[0:-4] == selected_fragments:
                         structure_list.append(child)
         except:
@@ -1060,7 +1046,6 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "ALPHAFOLD", "DOMAINS")).iterdir():
                 if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
-                    #for name in selected_fragments:
                     if str(os.path.basename(child)[0:-4]) == str(selected_fragments):
                         structure_list.append(child)
         except:
@@ -1069,7 +1054,6 @@ class Ui_ThirdWindow(object):
         try:
             for child in Path(os.path.join(output_dir, query_name, "ROSETTAFOLD", "DOMAINS")).iterdir():
                 if child.is_file() and "confident" not in str(child) and "domains" not in str(child):
-                    #for name in selected_fragments:
                     if str(os.path.basename(child)[0:-4]) == str(selected_fragments):
                         structure_list.append(child)
         except:
@@ -1187,14 +1171,12 @@ class Ui_ThirdWindow(object):
         self.label_6.setGeometry(QtCore.QRect(90, 500, 151, 31))
         self.label_6.setFont(font2)
         self.label_6.setObjectName("label")
-
         ThirdWindow.setCentralWidget(self.SecondOutputWindow)
         self.menubar = QtWidgets.QMenuBar(ThirdWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1059, 22))
         self.menubar.setObjectName("menubar")
         self.menuPage_1 = QtWidgets.QMenu(self.menubar)
         self.menuPage_1.setObjectName("menuPage_1")
-
         ThirdWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(ThirdWindow)
         self.statusbar.setObjectName("statusbar")
@@ -1247,7 +1229,6 @@ class Ui_ThirdWindow(object):
 
 if __name__ == "__main__":
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
@@ -1257,8 +1238,5 @@ if __name__ == "__main__":
     loop = QEventLoop()
     loop.exec()  # waits
 
-
-
     sys.exit(app.exec_())
-
 
