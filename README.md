@@ -6,11 +6,16 @@ Basically, we gather information from PDB (Protein Data Bank) and AlphaFold or R
 ## Installation and Requirements
 The Graphical User Interface, as the original program, uses external programs to work:
  - BLAST [Install BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
- - AlphaFold, non-docker set up (optional) [Install AlphaFold] (https://github.com/kalininalab/alphafold_non_docker)
- - RoseTTaFold (optional) [Install RoseTTaFold] (https://github.com/RosettaCommons/RoseTTAFold)
+ - AlphaFold, non-docker set up (optional) [Install AlphaFold](https://github.com/kalininalab/alphafold_non_docker)
+ - RoseTTaFold (optional) [Install RoseTTaFold](https://github.com/RosettaCommons/RoseTTAFold)
 
-Also, to install the Python packages you will need Conda and [pip] (https://pip.pypa.io/en/stable/installation/).
+Also, to install the Python packages you will need Conda and [pip](https://pip.pypa.io/en/stable/installation/).
 
 ## Run the GUI
-
+ 1.- Open a Terminal
+ 
+ 2.- Download this repository
+ '''ruby
+ git clone https://github.com/Mroyyy/GUI.git
+ '''
 
