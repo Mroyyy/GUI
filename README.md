@@ -15,7 +15,7 @@ Also, to install the Python packages you will need Conda and [pip](https://pip.p
  1.- Open a Terminal
  
  2.- Download this repository
- '''ruby
+ ```ruby
  git clone https://github.com/Mroyyy/GUI.git
- '''
+ ```
 
