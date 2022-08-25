@@ -3,4 +3,14 @@ Here is the source code for an application about fpegenaute Master Thesis for th
 The idea of his project (["Automated structural information retrieval for Integrative Modeling"](https://github.com/fpegenaute/TFM/blob/main/README.md#automated-structural-information-retrieval-for-integrative-modeling)) was to create a tool that combines information from already existing and experimental data in order to predict the dynamics of proteins.
 Basically, we gather information from PDB (Protein Data Bank) and AlphaFold or RoseTTaFold and use it as an input for IMP ([Integrative Modeling Platform](https://integrativemodeling.org/)), which gives us an hybrid approach integrating data from diverse biochemical and biophysical experiments.
 
+## Installation and Requirements
+The Graphical User Interface, as the original program, uses external programs to work:
+ - BLAST [Install BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
+ - AlphaFold, non-docker set up (optional) [Install AlphaFold] (https://github.com/kalininalab/alphafold_non_docker)
+ - RoseTTaFold (optional) [Install RoseTTaFold] (https://github.com/RosettaCommons/RoseTTAFold)
+
+Also, to install the Python packages you will need Conda and [pip] (https://pip.pypa.io/en/stable/installation/).
+
+## Run the GUI
+
 
