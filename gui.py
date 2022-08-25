@@ -9,14 +9,13 @@ from PyQt5.QtWidgets import QFileDialog, QTextEdit, QAction, QDialog, QSizePolic
 ##########################
 
 import Bio.SeqIO as IO
-# from custom_parser import parser
 
 import plotly
 from matplotlib.backends.backend_template import FigureCanvas
 from plotly.subplots import make_subplots
 from pygments.lexers import go
 
-import SecondWindow
+
 from bin.blast import *
 from bin.PDB_retriever import *
 import bin.config as cfg
@@ -351,7 +350,7 @@ class Ui_MainWindow(object):
 
     def get_file(self):
         '''
-        Function that gets filename of fasta, its directory, and the sequence it self
+        Function that gets filename of fasta, its directory, and the sequence itself
         '''
         global source
         global filename
@@ -806,94 +805,6 @@ class Ui_SecondWindow(object):
         self.actionCustom_hinges.setText(_translate("SecondWindow", "Custom hinges"))
 
 
-class Ui_plot(object):
-    '''
-    set up window to show image of plot
-    '''
-
-    def setup(self, plotWindow):
-        plotWindow.resize(1400, 733)
-        self.plotwindow = QtWidgets.QWidget(plotWindow)
-        self.plotwindow.setObjectName("plotwindow")
-        self.m_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
-        self.m_output.setGeometry(0, -10, 1391, 721)
-        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/coverage_plot.html")
-        self.m_output.load(url)
-        plotWindow.setCentralWidget(self.plotwindow)
-        self.menubar = QtWidgets.QMenuBar(plotWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
-        self.menubar.setObjectName("menubar")
-        plotWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(plotWindow)
-        self.statusbar.setObjectName("statusbar")
-        plotWindow.setStatusBar(self.statusbar)
-
-        self.retranslateUi(plotWindow)
-        QtCore.QMetaObject.connectSlotsByName(plotWindow)
-
-    def retranslateUi(self, plotWindow):
-        _translate = QtCore.QCoreApplication.translate
-        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
-
-
-class Ui_Secondplot(object):
-    '''
-    set up another window to show predicted hinges and flexibility plot
-    '''
-    def setup(self, plotWindow):
-        plotWindow.resize(1400, 733)
-        self.plotwindow = QtWidgets.QWidget(plotWindow)
-        self.plotwindow.setObjectName("plotwindow")
-        self.s_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
-        self.s_output.setGeometry(0, -10, 1391, 721)
-        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/hinges_prediction.html")
-        self.s_output.load(url)
-        plotWindow.setCentralWidget(self.plotwindow)
-        self.menubar = QtWidgets.QMenuBar(plotWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
-        self.menubar.setObjectName("menubar")
-        plotWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(plotWindow)
-        self.statusbar.setObjectName("statusbar")
-        plotWindow.setStatusBar(self.statusbar)
-
-        self.retranslateUi(plotWindow)
-        QtCore.QMetaObject.connectSlotsByName(plotWindow)
-
-    def retranslateUi(self, plotWindow):
-        _translate = QtCore.QCoreApplication.translate
-        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
-
-
-class Ui_Thirdplot(object):
-    '''
-    set up another window to show predicted hinges and flexibility plot
-    '''
-    def setup(self, plotWindow):
-        plotWindow.resize(1400, 733)
-        self.plotwindow = QtWidgets.QWidget(plotWindow)
-        self.plotwindow.setObjectName("plotwindow")
-        self.m_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
-        self.m_output.setGeometry(0, -10, 1391, 721)
-        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/structure_plot.html")
-        self.m_output.load(url)
-        plotWindow.setCentralWidget(self.plotwindow)
-        self.menubar = QtWidgets.QMenuBar(plotWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
-        self.menubar.setObjectName("menubar")
-        plotWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(plotWindow)
-        self.statusbar.setObjectName("statusbar")
-        plotWindow.setStatusBar(self.statusbar)
-
-        self.retranslateUi(plotWindow)
-        QtCore.QMetaObject.connectSlotsByName(plotWindow)
-
-    def retranslateUi(self, plotWindow):
-        _translate = QtCore.QCoreApplication.translate
-        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
-
-
 class Ui_ThirdWindow(object):
     def update_dropdown(self):
         structure_list = []
@@ -1223,6 +1134,97 @@ class Ui_ThirdWindow(object):
         self.actionHinges_and_Flexibility.setText(_translate("ThirdWindow", "Hinges and Flexibility"))
         self.actionComposite_and_Topology_File.setText(_translate("ThirdWindow", "Composite and Topology File"))
         self.actionCustom_hinges.setText(_translate("ThirdWindow", "Custom hinges"))
+
+
+class Ui_plot(object):
+    '''
+    set up window to show image of plot
+    '''
+
+    def setup(self, plotWindow):
+        plotWindow.resize(1400, 733)
+        self.plotwindow = QtWidgets.QWidget(plotWindow)
+        self.plotwindow.setObjectName("plotwindow")
+        self.m_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
+        self.m_output.setGeometry(0, -10, 1391, 721)
+        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/coverage_plot.html")
+        self.m_output.load(url)
+        plotWindow.setCentralWidget(self.plotwindow)
+        self.menubar = QtWidgets.QMenuBar(plotWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
+        self.menubar.setObjectName("menubar")
+        plotWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(plotWindow)
+        self.statusbar.setObjectName("statusbar")
+        plotWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(plotWindow)
+        QtCore.QMetaObject.connectSlotsByName(plotWindow)
+
+    def retranslateUi(self, plotWindow):
+        _translate = QtCore.QCoreApplication.translate
+        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
+
+
+class Ui_Secondplot(object):
+    '''
+    set up another window to show predicted hinges and flexibility plot
+    '''
+    def setup(self, plotWindow):
+        plotWindow.resize(1400, 733)
+        self.plotwindow = QtWidgets.QWidget(plotWindow)
+        self.plotwindow.setObjectName("plotwindow")
+        self.s_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
+        self.s_output.setGeometry(0, -10, 1391, 721)
+        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/hinges_prediction.html")
+        self.s_output.load(url)
+        plotWindow.setCentralWidget(self.plotwindow)
+        self.menubar = QtWidgets.QMenuBar(plotWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
+        self.menubar.setObjectName("menubar")
+        plotWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(plotWindow)
+        self.statusbar.setObjectName("statusbar")
+        plotWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(plotWindow)
+        QtCore.QMetaObject.connectSlotsByName(plotWindow)
+
+    def retranslateUi(self, plotWindow):
+        _translate = QtCore.QCoreApplication.translate
+        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
+
+
+class Ui_Thirdplot(object):
+    '''
+    set up another window to show predicted hinges and flexibility plot
+    '''
+    def setup(self, plotWindow):
+        plotWindow.resize(1400, 733)
+        self.plotwindow = QtWidgets.QWidget(plotWindow)
+        self.plotwindow.setObjectName("plotwindow")
+        self.m_output = QtWebEngineWidgets.QWebEngineView(self.plotwindow)
+        self.m_output.setGeometry(0, -10, 1391, 721)
+        url = QtCore.QUrl.fromLocalFile(f"{plot_dir}/structure_plot.html")
+        self.m_output.load(url)
+        plotWindow.setCentralWidget(self.plotwindow)
+        self.menubar = QtWidgets.QMenuBar(plotWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1066, 22))
+        self.menubar.setObjectName("menubar")
+        plotWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(plotWindow)
+        self.statusbar.setObjectName("statusbar")
+        plotWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(plotWindow)
+        QtCore.QMetaObject.connectSlotsByName(plotWindow)
+
+    def retranslateUi(self, plotWindow):
+        _translate = QtCore.QCoreApplication.translate
+        plotWindow.setWindowTitle(_translate("plotWindow", "plotWindow"))
+
+
+
 
 
 
