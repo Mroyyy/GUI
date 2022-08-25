@@ -11,11 +11,39 @@ The Graphical User Interface, as the original program, uses external programs to
 
 Also, to install the Python packages you will need Conda and [pip](https://pip.pypa.io/en/stable/installation/).
 
-## Run the GUI
+## Set up the program
  1.- Open a Terminal
  
  2.- Download this repository
  ```ruby
  git clone https://github.com/Mroyyy/GUI.git
  ```
+ 
+ 3.- Create a conda environment to avoid dependency issues
+```ruby
+conda create --name your_env python=3.8
+```
 
+4.- Install the Python packages needed by the program
+```ruby
+pip install requirements.txt
+```
+- Alternatively, if you have conda installed, you can create the environment with all the dependencies as:
+```ruby
+conda env create -f environment.yaml --name your_env
+```
+
+5.- Configure the program. Open the file config.py inside the bin/ folder, and in the line 6 change:
+```ruby
+"blastdb" : "/path/BLAST/database"
+```
+
+## Run the GUI
+Once everything is installed, open the GUI by just typing:
+```ruby
+python3 gui.py
+```
+
+There are instructions in a Help Window, but to start you will only need two arguments:
+ - Input sequence in FASTA format
+ - Output directory to store the retrieved PDBs
