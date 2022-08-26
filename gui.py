@@ -1237,8 +1237,8 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     # GUI pops up
     MainWindow.show()
-    loop = QEventLoop()
-    loop.exec()  # waits
+    #loop = QEventLoop()
+    #loop.exec()  # waits
 
     sys.exit(app.exec_())
 
