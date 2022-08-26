@@ -127,4 +127,7 @@ SEC3/
 ## FAQS
 **Why in the main window there are more labels than used?** The idea is to implement AlphaFold and RoseTTaFold models (or to run the server directly) and obtain the most complete structure as possible. If it was the case in the Composite and Topology File we could also observe and select fragments from AlphaFold model for example.
 
-**I can only run it on Linux?** Currently you have to run the GUI from the terminal, but the future idea is to obtain an .exe one file with all packages and needed files.
+**Can I only run it on Linux?** Currently you have to run the GUI from the terminal, but the future idea is to obtain an .exe one file with all packages and needed files.
+
+It needs to have the **same file name and header** e. g. the file SEC3.fasta starts with the line ">SEC3"
+
