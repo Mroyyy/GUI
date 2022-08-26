@@ -24,9 +24,10 @@ Also, to install the Python packages you will need Conda and [pip](https://pip.p
 conda create --name your_env python=3.8
 ```
 
-4.- Install the **Python packages** needed by the program
+4.- Install the **Python packages** needed by the program in the working directory
 ```ruby
-pip install requirements.txt
+cd path/to/working/directory
+pip install -r requirements.txt
 ```
 - **What is recommended**, if you have conda installed, you can create the environment with all the dependencies as:
 ```ruby
@@ -49,3 +50,6 @@ python3 gui.py
 There are instructions in a Help Window, but to start you will only need two arguments:
  - **Input sequence** in FASTA format
  - **Output directory** to store the retrieved PDBs
+ 
+ 
+ ## Practical example: SEC3
