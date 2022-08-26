@@ -62,7 +62,6 @@ conda activate your_env
 python3 gui.py
 ```
 
-![main](https://user-images.githubusercontent.com/93529369/186919929-8c50af15-40a1-4c43-90e8-c00ec4e39262.png)
-
+![Screenshot from 2022-08-26 16-01-57](https://user-images.githubusercontent.com/93529369/186921187-c3aa6067-9ca0-4528-a8c1-28381872e9f4.png)
 
 
