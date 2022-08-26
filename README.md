@@ -72,10 +72,10 @@ python3 gui.py
    
 ![hinges](https://user-images.githubusercontent.com/93529369/186927248-be52fb78-ad76-4ecc-9eb0-9fa04acbe816.png)
 
-This custom topology file will be the input file for IMP:
+**This custom topology file will be the input file for IMP:**
 
 ![top](https://user-images.githubusercontent.com/93529369/186927563-05ea9067-d66c-4e62-bc57-bdabb61e031a.png)
 
-
+**IMP Output**
 ![imp](https://user-images.githubusercontent.com/93529369/186927966-b44bdaa4-2981-4cb3-8804-f36e063e3c44.png)
 
