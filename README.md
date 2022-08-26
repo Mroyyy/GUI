@@ -64,4 +64,16 @@ python3 gui.py
 
 ![Screenshot from 2022-08-26 16-01-57](https://user-images.githubusercontent.com/93529369/186921187-c3aa6067-9ca0-4528-a8c1-28381872e9f4.png)
 
+3.- **Output**
+ - **Coverage**: Which parts of the FASTA are covered
+ - **Hinges and flexibilility**: Hinges are regions of the protein that allow it to move and change conformations. In this plot you can observe its prediction
+ - **Composite and Topology File**:  From all the structures retrieved by the program, a composite is generated, trying to cover as much of the reference sequence as possible, avoiding overlaps.
+ - **Custom hinges**: In this section, hinge regions can be introduced, allowing the movement of the more rigid domains.
+   An example is shown below:
+   
+![hinges](https://user-images.githubusercontent.com/93529369/186927248-be52fb78-ad76-4ecc-9eb0-9fa04acbe816.png)
+
+This custom topology file will be the input file for IMP:
+
+![top](https://user-images.githubusercontent.com/93529369/186927563-05ea9067-d66c-4e62-bc57-bdabb61e031a.png)
 
