@@ -8,3 +8,4 @@ nbformat
 plotly
 mplcursors
 six
+pyqt5
