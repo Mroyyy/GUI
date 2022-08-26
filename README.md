@@ -126,4 +126,5 @@ SEC3/
 
 ## FAQS
 **Why in the main window there are more labels than used?** The idea is to implement AlphaFold and RoseTTaFold models (or to run the server directly) and obtain the most complete structure as possible. If it was the case in the Composite and Topology File we could also observe and select fragments from AlphaFold model for example.
+
 **I can only run it on Linux?** Currently you have to run the GUI from the terminal, but the future idea is to obtain an .exe one file with all packages and needed files.
