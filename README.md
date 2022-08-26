@@ -44,19 +44,25 @@ conda env create -f environment.yaml --name your_env
  Sec3 is an essential protein which participates in exocytosis, whose full structure is still unkown. Its sequence in FASTA format is on "input_fasta" directory. **All sequences you want to study have to be in the same directory as the program to work**
 
 There are instructions in a Help Window, but to start you will only need two arguments:
+ - **Input sequence** in FASTA format
+ - **Output directory** to store the retrieved PDBs
 
 ![helpred](https://user-images.githubusercontent.com/93529369/186919664-9dc2c591-ce28-41bb-9f7e-2d7f819590be.png)
 
 
 ![help](https://user-images.githubusercontent.com/93529369/186918736-843cd346-d96f-4d55-a026-d0e7ed606eda.png)
- - **Input sequence** in FASTA format
- - **Output directory** to store the retrieved PDBs
 
-1.- Activate your environment!
+
+1.- **Activate your environment**
 ```ruby
 conda activate your_env
 ```
-2.- Run GUI
+2.- **Run GUI**
 ```ruby
 python3 gui.py
 ```
+
+![main](https://user-images.githubusercontent.com/93529369/186919929-8c50af15-40a1-4c43-90e8-c00ec4e39262.png)
+
+
+
