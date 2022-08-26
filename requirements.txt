@@ -1,0 +1,10 @@
+cctbx-base
+py-packman
+matplotlib
+# networkx
+dash
+nbconvert
+nbformat
+plotly
+mplcursors
+six
