@@ -52,7 +52,6 @@ There are instructions in a Help Window, but to start you will only need two arg
 
 ![help](https://user-images.githubusercontent.com/93529369/186918736-843cd346-d96f-4d55-a026-d0e7ed606eda.png)
 
-
 1.- **Activate your environment**
 ```ruby
 conda activate your_env
@@ -76,4 +75,7 @@ python3 gui.py
 This custom topology file will be the input file for IMP:
 
 ![top](https://user-images.githubusercontent.com/93529369/186927563-05ea9067-d66c-4e62-bc57-bdabb61e031a.png)
+
+
+![imp](https://user-images.githubusercontent.com/93529369/186927966-b44bdaa4-2981-4cb3-8804-f36e063e3c44.png)
 
