@@ -39,17 +39,20 @@ conda env create -f environment.yaml --name your_env
 "blastdb" : "/path/BLAST/database"
 ```
 
-## Run the GUI
-Before running the GUI **make sure input FASTA and bin folder are in the same directory as the main program**.
+ 
+ ## Practical example: SEC3
+ Sec3 is an essential protein which participates in exocytosis, whose full structure is still unkown. Its sequence in FASTA format is on "input_fasta" directory. **All sequences you want to study have to be in the same directory as the program to work**
 
-Once everything is installed, open the GUI by just typing (with conda environment activated):
+There are instructions in a Help Window, but to start you will only need two arguments:
+
+ - **Input sequence** in FASTA format
+ - **Output directory** to store the retrieved PDBs
+
+1.- Activate your environment
+```ruby
+conda activate your_env
+```
+2.- Run GUI
 ```ruby
 python3 gui.py
 ```
-
-There are instructions in a Help Window, but to start you will only need two arguments:
- - **Input sequence** in FASTA format
- - **Output directory** to store the retrieved PDBs
- 
- 
- ## Practical example: SEC3
