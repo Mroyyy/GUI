@@ -77,5 +77,50 @@ python3 gui.py
 ![top](https://user-images.githubusercontent.com/93529369/186927563-05ea9067-d66c-4e62-bc57-bdabb61e031a.png)
 
 **IMP Output**
+
 ![imp](https://user-images.githubusercontent.com/93529369/186927966-b44bdaa4-2981-4cb3-8804-f36e063e3c44.png)
+
+
+
+At this pont, the output directory should contain the files and directories described bellow:
+```
+SEC3/
+ BLAST/
+  SEC3_blast.out
+ FASTA/
+  5LG4.fa
+  5YFP.fa
+ HINGES/
+  5lg4_B.hng
+  5lg4_B_packman_output.txt
+  5yfp_A.hng
+  5yfp_A_packman_output.txt
+ IMP/
+  SEC3.topology
+  *SEC3_custom.topology*
+ LOG/
+  SEC3.log
+ PDB/
+  CHAINS/
+  partial/
+   5lg4_B.pdb
+   5yfp_A.pdb
+  5lg4.cif
+  5yfp.cif
+ PLOTS/
+  coverage_plot.html
+  coverage_plot.png
+  hinges_prediction.html
+  hinges_prediction.png
+  structure_plot.html
+  structure_plot.png
+ REPORT/
+  COVERAGE/
+   5lg4_B_coverage.csv
+   5yfp_A_coverage.csv
+   SEC3_composite_coverage.csv
+  DFI/
+   5lg4_B_DFI_coverage.csv
+   5yfp_A_DFI_coverage.csv
+```
 
