@@ -28,7 +28,7 @@ conda create --name your_env python=3.8
 ```ruby
 pip install requirements.txt
 ```
-- Alternatively, if you have conda installed, you can create the environment with all the dependencies as:
+- What is recommended, if you have conda installed, you can create the environment with all the dependencies as:
 ```ruby
 conda env create -f environment.yaml --name your_env
 ```
@@ -39,7 +39,9 @@ conda env create -f environment.yaml --name your_env
 ```
 
 ## Run the GUI
-Once everything is installed, open the GUI by just typing:
+Before running the GUI make sure input FASTA and bin folder are in the same directory as the main program.
+
+Once everything is installed, open the GUI by just typing (with conda environment activated):
 ```ruby
 python3 gui.py
 ```
