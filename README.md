@@ -78,11 +78,7 @@ python3 gui.py
 
 **IMP Output**
 
-https://user-images.githubusercontent.com/93529369/187159288-6f9d1863-edeb-4a92-8036-f04b93d37c05.mp4
-
-
-![imp](https://user-images.githubusercontent.com/93529369/186927966-b44bdaa4-2981-4cb3-8804-f36e063e3c44.png)
-
+![Screencast 2022-08-29 10_23_15](https://user-images.githubusercontent.com/93529369/187159510-aea810b2-c0ad-4fad-b9ce-08d67aab2278.gif)
 
 
 At this pont, the output directory should contain the files and directories described bellow:
